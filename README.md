@@ -7,7 +7,9 @@ Framework-agnostic holographic trading-card effect — tilt, shine, glare and fo
 foils (`holo` / `reverse` / `cosmos` / `glitter`) that react to pointer and
 gyroscope, with procedurally code-generated textures. No runtime dependencies.
 
-**[Live demo →](https://kongyo2.github.io/cards-css/)**
+[![cards-css — holographic trading cards showing the holo, reverse, cosmos and glitter foils](./assets/screenshot.jpg)](https://kongyo2.github.io/cards-css/)
+
+**[Live demo →](https://kongyo2.github.io/cards-css/)** — move the pointer across a card, or tilt your phone, to see the foil shift.
 
 ## Install
 
