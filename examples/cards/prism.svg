@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="919" viewBox="0 0 660 919" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a1320" />
+      <stop offset="0.55" stop-color="#142a3e" />
+      <stop offset="1" stop-color="#05080f" />
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="660" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d8fbff" />
+      <stop offset="0.5" stop-color="#67c7d6" />
+      <stop offset="1" stop-color="#2f6f8c" />
+    </linearGradient>
+    <radialGradient id="art" cx="0.5" cy="0.42" r="0.85">
+      <stop offset="0" stop-color="#163a52" />
+      <stop offset="1" stop-color="#060d16" />
+    </radialGradient>
+    <linearGradient id="facetA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bafcff" />
+      <stop offset="1" stop-color="#2aa6c4" />
+    </linearGradient>
+    <linearGradient id="facetB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fe0ff" />
+      <stop offset="1" stop-color="#1f6f9c" />
+    </linearGradient>
+    <linearGradient id="facetC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff9be6" />
+      <stop offset="1" stop-color="#9a3ec4" />
+    </linearGradient>
+  </defs>
+
+  <rect width="660" height="919" fill="url(#bg)" />
+  <rect x="16" y="16" width="628" height="887" rx="30" fill="none" stroke="url(#rim)" stroke-width="7" />
+  <rect x="30" y="30" width="600" height="859" rx="22" fill="none" stroke="#73c4d6" stroke-width="1.5" opacity="0.55" />
+
+  <rect x="44" y="40" width="572" height="86" rx="16" fill="#0c2436" stroke="url(#rim)" stroke-width="3" />
+  <g transform="translate(92 83)">
+    <polygon points="0,-26 24,-8 14,24 -14,24 -24,-8" fill="url(#facetA)" />
+  </g>
+  <text x="138" y="96" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700" fill="#d8fbff">Prism Golem</text>
+  <text x="592" y="76" font-family="Georgia, serif" font-size="24" font-weight="700" fill="#a9eef7" text-anchor="end">HP 140</text>
+  <text x="592" y="104" font-family="Georgia, serif" font-size="18" fill="#5fcad6" text-anchor="end">Crystal</text>
+
+  <rect x="48" y="146" width="564" height="520" rx="14" fill="url(#art)" stroke="url(#rim)" stroke-width="3" />
+  <clipPath id="artclip"><rect x="48" y="146" width="564" height="520" rx="14" /></clipPath>
+  <g clip-path="url(#artclip)">
+    <polygon points="222,560 200,360 300,300 330,560" fill="url(#facetB)" />
+    <polygon points="330,560 300,300 300,300 222,560" fill="#ffffff" opacity="0.05" />
+    <polygon points="330,560 360,236 430,330 410,560" fill="url(#facetA)" />
+    <polygon points="360,236 430,330 388,344" fill="#ffffff" opacity="0.22" />
+    <polygon points="410,560 430,330 510,400 470,560" fill="url(#facetC)" />
+    <polygon points="222,560 300,300 330,560" fill="#0a1320" opacity="0.18" />
+    <polygon points="160,560 200,360 222,560" fill="url(#facetB)" />
+    <polygon points="470,560 510,400 540,560" fill="url(#facetA)" />
+    <g stroke="#eaffff" stroke-width="2" opacity="0.5">
+      <line x1="360" y1="236" x2="410" y2="560" />
+      <line x1="300" y1="300" x2="330" y2="560" />
+    </g>
+    <g fill="#ffffff">
+      <polygon points="300,260 308,288 336,296 308,304 300,332 292,304 264,296 292,288" opacity="0.95" />
+      <polygon points="486,420 491,438 509,443 491,448 486,466 481,448 463,443 481,438" opacity="0.8" />
+      <polygon points="196,470 200,484 214,488 200,492 196,506 192,492 178,488 192,484" opacity="0.75" />
+    </g>
+  </g>
+
+  <rect x="48" y="686" width="564" height="150" rx="14" fill="#0a1320" stroke="url(#rim)" stroke-width="2" />
+  <text x="72" y="730" font-family="Georgia, serif" font-size="27" font-weight="700" fill="#a9eef7">Refraction</text>
+  <text x="72" y="766" font-family="Georgia, serif" font-size="19" fill="#c4eef5">Split every incoming attack across your bench,</text>
+  <text x="72" y="793" font-family="Georgia, serif" font-size="19" fill="#c4eef5">scattering damage into a thousand glints.</text>
+
+  <text x="72" y="862" font-family="Georgia, serif" font-size="16" fill="#73c4d6" opacity="0.85">&#9733;&#9733;&#9733;&#9733;&#9734;  &#183;  Prism Set 52 / 99</text>
+  <text x="588" y="862" font-family="Georgia, serif" font-size="16" fill="#73c4d6" text-anchor="end" opacity="0.85">cards-css</text>
+</svg>

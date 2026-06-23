@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="919" viewBox="0 0 660 919" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#04141c" />
+      <stop offset="0.55" stop-color="#06303f" />
+      <stop offset="1" stop-color="#020a10" />
+    </linearGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="660" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#dff3ff" />
+      <stop offset="0.5" stop-color="#6fa6bf" />
+      <stop offset="1" stop-color="#2c5566" />
+    </linearGradient>
+    <radialGradient id="art" cx="0.5" cy="0.42" r="0.8">
+      <stop offset="0" stop-color="#0a4a5e" />
+      <stop offset="1" stop-color="#031018" />
+    </radialGradient>
+    <linearGradient id="serpent" x1="160" y1="260" x2="500" y2="620" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9ff0e6" />
+      <stop offset="0.5" stop-color="#22b6c4" />
+      <stop offset="1" stop-color="#0e6f8c" />
+    </linearGradient>
+  </defs>
+
+  <rect width="660" height="919" fill="url(#bg)" />
+  <rect x="16" y="16" width="628" height="887" rx="30" fill="none" stroke="url(#silver)" stroke-width="7" />
+  <rect x="30" y="30" width="600" height="859" rx="22" fill="none" stroke="#7fb6c8" stroke-width="1.5" opacity="0.55" />
+
+  <rect x="44" y="40" width="572" height="86" rx="16" fill="#072a37" stroke="url(#silver)" stroke-width="3" />
+  <path d="M92 60 L114 83 L92 106 L70 83 Z" fill="url(#silver)" />
+  <text x="138" y="96" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700" fill="#dff3ff">Leviathan</text>
+  <text x="592" y="76" font-family="Georgia, serif" font-size="24" font-weight="700" fill="#aee6f5" text-anchor="end">HP 160</text>
+  <text x="592" y="104" font-family="Georgia, serif" font-size="18" fill="#5fc5d6" text-anchor="end">Water</text>
+
+  <rect x="48" y="146" width="564" height="520" rx="14" fill="url(#art)" stroke="url(#silver)" stroke-width="3" />
+  <clipPath id="artclip"><rect x="48" y="146" width="564" height="520" rx="14" /></clipPath>
+  <g clip-path="url(#artclip)">
+    <g stroke="#0f6f88" stroke-width="2" opacity="0.5" fill="none">
+      <path d="M48 250 C170 220 250 300 360 270 C470 240 560 300 612 270" />
+      <path d="M48 360 C170 330 250 410 360 380 C470 350 560 410 612 380" />
+      <path d="M48 470 C170 440 250 520 360 490 C470 460 560 520 612 490" />
+      <path d="M48 580 C170 550 250 630 360 600 C470 570 560 630 612 600" />
+    </g>
+    <path d="M150 600 C150 470 250 430 330 470 C420 514 470 470 470 380 C470 300 410 270 350 296 C300 318 312 384 360 392 C396 398 408 366 392 344"
+          fill="none" stroke="url(#serpent)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M150 600 C150 470 250 430 330 470 C420 514 470 470 470 380 C470 300 410 270 350 296 C300 318 312 384 360 392 C396 398 408 366 392 344"
+          fill="none" stroke="#cdf6ff" stroke-width="10" stroke-linecap="round" opacity="0.45" />
+    <circle cx="384" cy="334" r="9" fill="#06303f" />
+    <path d="M392 320 L426 300 L420 332 Z" fill="#9ff0e6" />
+    <g fill="#0a4a5e" opacity="0.85">
+      <circle cx="190" cy="572" r="8" />
+      <circle cx="232" cy="520" r="8" />
+      <circle cx="300" cy="476" r="8" />
+      <circle cx="372" cy="486" r="8" />
+      <circle cx="430" cy="452" r="8" />
+      <circle cx="456" cy="384" r="8" />
+    </g>
+  </g>
+
+  <rect x="48" y="686" width="564" height="150" rx="14" fill="#04141c" stroke="url(#silver)" stroke-width="2" />
+  <text x="72" y="730" font-family="Georgia, serif" font-size="27" font-weight="700" fill="#aee6f5">Tidal Coil</text>
+  <text x="72" y="766" font-family="Georgia, serif" font-size="19" fill="#bfe6f0">Drag an opposing card to the back of the</text>
+  <text x="72" y="793" font-family="Georgia, serif" font-size="19" fill="#bfe6f0">bench as a crushing wave rolls over the field.</text>
+
+  <text x="72" y="862" font-family="Georgia, serif" font-size="16" fill="#7fb6c8" opacity="0.85">&#9733;&#9733;&#9733;&#9734;&#9734;  &#183;  Abyss Set 18 / 99</text>
+  <text x="588" y="862" font-family="Georgia, serif" font-size="16" fill="#7fb6c8" text-anchor="end" opacity="0.85">cards-css</text>
+</svg>

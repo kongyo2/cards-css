@@ -10,5 +10,5 @@
   "rules": {
     "no-console": "off"
   },
-  "ignorePatterns": ["node_modules", "dist", "dist-types", "build", "coverage", "*.min.js"]
+  "ignorePatterns": ["node_modules", "dist", "dist-types", "_site", "examples", "build", "coverage", "*.min.js"]
 }

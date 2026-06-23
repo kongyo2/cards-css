@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>cards-css &middot; holographic trading-card effects</title>
+    <meta
+      name="description"
+      content="Framework-agnostic holographic trading-card effects (tilt, shine, glare, holo / reverse / cosmos / glitter) with procedurally generated textures."
+    />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0b0a14" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="cards-css" />
+    <meta
+      property="og:description"
+      content="Holographic trading-card effects for the web — holo, reverse, cosmos and glitter foils that react to pointer and gyroscope."
+    />
+    <link rel="icon" href="./cards/prism.svg" />
+    <link rel="stylesheet" href="./holo-cards.css" />
+    <style>
+      :root {
+        --ink: #eef0ff;
+        --muted: #9aa0c4;
+        --accent: #8b7bff;
+        --panel: rgba(20, 20, 38, 0.66);
+        --line: rgba(255, 255, 255, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        line-height: 1.55;
+        background:
+          radial-gradient(120% 80% at 15% -10%, #2a1d63 0%, transparent 55%),
+          radial-gradient(110% 80% at 100% 0%, #123a52 0%, transparent 50%),
+          radial-gradient(120% 120% at 50% 120%, #3a1140 0%, transparent 55%), #07060f;
+        background-attachment: fixed;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: clamp(2.5rem, 6vw, 5rem) 1.25rem 4rem;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: clamp(2.5rem, 6vw, 4rem);
+      }
+
+      .eyebrow {
+        display: inline-block;
+        font-size: 0.78rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: clamp(2.6rem, 8vw, 4.5rem);
+        line-height: 1;
+        margin: 0 0 1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(120deg, #fff 10%, #b9a8ff 45%, #6fd3e6 90%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .tagline {
+        max-width: 38rem;
+        margin: 0 auto 1.75rem;
+        color: var(--muted);
+        font-size: clamp(1rem, 2.4vw, 1.18rem);
+      }
+
+      .links {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.6rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 600;
+        backdrop-filter: blur(8px);
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease;
+      }
+
+      .links a:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+      }
+
+      .links a.primary {
+        background: linear-gradient(120deg, #6f5bff, #4aa8d8);
+        border-color: transparent;
+      }
+
+      .hint {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0 0 2.5rem;
+      }
+
+      #cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: clamp(2rem, 5vw, 3.25rem) clamp(1.5rem, 4vw, 2.5rem);
+        justify-items: center;
+        align-items: start;
+        max-width: 980px;
+        margin: 0 auto;
+      }
+
+      .slot {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .stage {
+        width: clamp(200px, 70vw, 264px);
+      }
+
+      .caption {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+
+      .caption .effect {
+        font-size: 0.74rem;
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .caption .name {
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      footer {
+        max-width: 720px;
+        margin: clamp(4rem, 9vw, 7rem) auto 0;
+      }
+
+      footer h2 {
+        text-align: center;
+        font-size: 1.4rem;
+        margin: 0 0 1.5rem;
+      }
+
+      pre {
+        margin: 0 0 1rem;
+        padding: 1.1rem 1.25rem;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: rgba(8, 8, 18, 0.8);
+        overflow-x: auto;
+        font-size: 0.86rem;
+        line-height: 1.6;
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        color: #d7d9f5;
+      }
+
+      .tok-key {
+        color: #c08bff;
+      }
+      .tok-str {
+        color: #7fe0b0;
+      }
+      .tok-fn {
+        color: #6fd3e6;
+      }
+      .tok-dim {
+        color: var(--muted);
+      }
+
+      .colophon {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 2.5rem;
+      }
+
+      .colophon a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <span class="eyebrow">cards-css</span>
+        <h1>Holographic cards</h1>
+        <p class="tagline">
+          Framework-agnostic trading-card effects &mdash; tilt, shine and glare with holo, reverse, cosmos and glitter
+          foils, all driven by procedurally generated textures.
+        </p>
+        <nav class="links">
+          <a class="primary" href="https://github.com/kongyo2/cards-css">GitHub</a>
+          <a href="https://www.npmjs.com/package/@kongyo2/cards-css">npm</a>
+        </nav>
+      </header>
+
+      <p class="hint">Move your pointer across a card to tilt it &middot; tap or click to enlarge.</p>
+
+      <main id="cards"></main>
+
+      <footer>
+        <h2>Get started</h2>
+        <pre><code><span class="tok-dim">npm install @kongyo2/cards-css</span></code></pre>
+        <pre><code><span class="tok-key">import</span> { <span class="tok-fn">createHoloCard</span> } <span class="tok-key">from</span> <span class="tok-str">"@kongyo2/cards-css"</span>;
+<span class="tok-key">import</span> <span class="tok-str">"@kongyo2/cards-css/styles.css"</span>;
+
+<span class="tok-key">const</span> card = <span class="tok-fn">createHoloCard</span>({
+  image: <span class="tok-str">"/charizard.png"</span>,
+  effect: <span class="tok-str">"holo"</span>,
+});
+document.body.<span class="tok-fn">append</span>(card.element);</code></pre>
+        <p class="colophon">
+          Card artwork is original geometric art for this demo &middot;
+          <a href="https://github.com/kongyo2/cards-css">source on GitHub</a>
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="./demo.js"></script>
+  </body>
+</html>

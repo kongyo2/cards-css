@@ -1,6 +1,8 @@
 node_modules
 dist
 dist-types
+_site
+examples/cards
 build
 coverage
 *.min.js
