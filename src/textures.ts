@@ -38,6 +38,14 @@ const svgToDataUri = (svg: string): string => {
   return `data:image/svg+xml,${encoded}`;
 };
 
+const svgDocument = (width: number, height: number, defs: string, body: string): string =>
+  svgToDataUri(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}' viewBox='0 0 ${width} ${height}'>` +
+      (defs ? `<defs>${defs}</defs>` : "") +
+      body +
+      `</svg>`,
+  );
+
 const pick = <T>(rng: () => number, items: readonly T[]): T => {
   const value = items[Math.floor(rng() * items.length)];
   return value ?? (items[0] as T);
@@ -56,6 +64,9 @@ const circle = (
   const filter = opts.filter ? ` filter='url(${opts.filter})'` : "";
   return `<circle cx='${x.toFixed(1)}' cy='${y.toFixed(1)}' r='${r.toFixed(opts.rDigits ?? 2)}' fill='${fill}' opacity='${opacity.toFixed(2)}'${filter}/>`;
 };
+
+const gaussianBlurFilter = (id: string, std: number, margin: string, size: string): string =>
+  `<filter id='${id}' x='${margin}' y='${margin}' width='${size}' height='${size}'><feGaussianBlur stdDeviation='${std}'/></filter>`;
 
 const discreteTable = (keep: number, steps = 32): string => {
   const ones = Math.min(steps, Math.max(1, Math.round(steps * keep)));
@@ -161,29 +172,23 @@ const ringClusters = (rng: () => number, width: number, height: number, count: n
 const COSMOS_W = 512;
 const COSMOS_H = 716;
 
-const cosmosSvgOpen = (extraDefs: string): string =>
-  `<svg xmlns='http://www.w3.org/2000/svg' width='${COSMOS_W}' height='${COSMOS_H}' viewBox='0 0 ${COSMOS_W} ${COSMOS_H}'>` +
-  `<defs>` +
-  `<filter id='blur' x='-30%' y='-30%' width='160%' height='160%'><feGaussianBlur stdDeviation='2.6'/></filter>` +
-  `<filter id='glow' x='-200%' y='-200%' width='500%' height='500%'><feGaussianBlur stdDeviation='2.4'/></filter>` +
-  `${extraDefs}` +
-  `</defs>`;
+const cosmosDefs = (extraDefs: string): string =>
+  gaussianBlurFilter("blur", 2.6, "-30%", "160%") + gaussianBlurFilter("glow", 2.4, "-200%", "500%") + extraDefs;
 
-export const grainTexture = (seed: number): string => {
-  const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>` +
+export const grainTexture = (seed: number): string =>
+  svgDocument(
+    200,
+    200,
     `<filter id='grain' x='0%' y='0%' width='100%' height='100%'>` +
-    `<feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='${seed % 9973}' stitchTiles='stitch' result='n'/>` +
-    `<feColorMatrix in='n' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0' result='a'/>` +
-    `<feComponentTransfer in='a' result='m'><feFuncA type='discrete' tableValues='${discreteTable(0.28)}'/></feComponentTransfer>` +
-    `<feFlood flood-color='#ffffff' result='w'/>` +
-    `<feComposite in='w' in2='m' operator='in'/>` +
-    `</filter>` +
+      `<feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='${seed % 9973}' stitchTiles='stitch' result='n'/>` +
+      `<feColorMatrix in='n' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0' result='a'/>` +
+      `<feComponentTransfer in='a' result='m'><feFuncA type='discrete' tableValues='${discreteTable(0.28)}'/></feComponentTransfer>` +
+      `<feFlood flood-color='#ffffff' result='w'/>` +
+      `<feComposite in='w' in2='m' operator='in'/>` +
+      `</filter>`,
     `<rect width='100%' height='100%' fill='#000000'/>` +
-    `<rect width='100%' height='100%' filter='url(#grain)' opacity='0.4'/>` +
-    `</svg>`;
-  return svgToDataUri(svg);
-};
+      `<rect width='100%' height='100%' filter='url(#grain)' opacity='0.4'/>`,
+  );
 
 export const glitterTexture = (seed: number): string => {
   const { defs, body } = speckleField("gl", seed, [
@@ -193,13 +198,12 @@ export const glitterTexture = (seed: number): string => {
   ]);
   const rng = mulberry32(seed + 99);
   const flares = brightStars(rng, 240, 240, 16, "#glow");
-  const svg =
-    `<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'>` +
-    `<defs><filter id='glow' x='-200%' y='-200%' width='500%' height='500%'><feGaussianBlur stdDeviation='1.5'/></filter>${defs}</defs>` +
-    `<rect width='100%' height='100%' fill='#050505'/>` +
-    `${body}${flares}` +
-    `</svg>`;
-  return svgToDataUri(svg);
+  return svgDocument(
+    240,
+    240,
+    `${gaussianBlurFilter("glow", 1.5, "-200%", "500%")}${defs}`,
+    `<rect width='100%' height='100%' fill='#050505'/>${body}${flares}`,
+  );
 };
 
 const cosmosLayer = (
@@ -210,7 +214,7 @@ const cosmosLayer = (
 ): string => {
   const rng = mulberry32(seed);
   const { defs, body } = speckleField(idBase, seed, layers, false);
-  return svgToDataUri(`${cosmosSvgOpen(defs)}${paint(rng, body)}</svg>`);
+  return svgDocument(COSMOS_W, COSMOS_H, cosmosDefs(defs), paint(rng, body));
 };
 
 const cosmosBottom = (seed: number): string =>
