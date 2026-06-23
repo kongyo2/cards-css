@@ -34,9 +34,4 @@ Subagents run the latest model — treat them as a trusted colleague, not a proc
 
 A capable model boxed in with no escape hatch doesn't hallucinate so much as assert conjecture — stating a guess as fact. Rigid constraints raising accuracy is a previous-generation assumption.
 
-# コード設計
-
-- 関心の分離を保つ
-- 状態とロジックを分離する
-- コントラクト層（API/型）を厳密に定義し、実装層は再生成可能に保つ
 
