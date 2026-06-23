@@ -45,8 +45,8 @@ Set via the `effect` option (or `card.setEffect(...)` at runtime):
 | `none`    | Tilt, shine and glare only — no foil                             |
 | `holo`    | Rainbow holographic foil                                         |
 | `reverse` | Reverse-line holographic foil                                    |
-| `cosmos`  | Galaxy / cosmos foil (procedural — vary with `textureSeed`)      |
-| `glitter` | Glitter / sparkle foil (procedural — vary with `textureSeed`)    |
+| `cosmos`  | Galaxy / cosmos foil (procedural — needs `textureSeed`)      |
+| `glitter` | Glitter / sparkle foil (procedural — needs `textureSeed`)    |
 
 ## Options
 
@@ -63,7 +63,7 @@ Set via the `effect` option (or `card.setEffect(...)` at runtime):
 | `showcase`        | `boolean` | `false`  | Auto-animate once on mount                         |
 | `glow`            | `string`  | —        | CSS color for the card glow                        |
 | `aspectRatio`     | `number`  | —        | Card aspect ratio (width / height)                 |
-| `textureSeed`     | `number`  | random   | Seed for procedural `cosmos` / `glitter` textures  |
+| `textureSeed`     | `number`  | —        | Seed for the generated `cosmos` / `glitter` textures; without it those two foils render without their procedural layers |
 | `mask` / `foil`   | `string`  | —        | URLs for a mask / custom foil overlay              |
 
 ## API
