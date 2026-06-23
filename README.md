@@ -1,7 +1,7 @@
 # cards-css
 
 [![npm](https://img.shields.io/npm/v/@kongyo2/cards-css.svg)](https://www.npmjs.com/package/@kongyo2/cards-css)
-[![license](https://img.shields.io/npm/l/@kongyo2/cards-css.svg)](./LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kongyo2/cards-css)
 
 Framework-agnostic holographic trading-card effect — tilt, shine, glare and four
 foils (`holo` / `reverse` / `cosmos` / `glitter`) that react to pointer and
