@@ -81,34 +81,6 @@ On iOS, gyroscope access needs a one-time permission prompt triggered by a user
 gesture — call `requestOrientationPermission()` (exported) from a click/tap
 handler.
 
-## Releasing
-
-Publishing is manual: the **Publish to npm** GitHub Action
-(`.github/workflows/publish.yml`) only runs on `workflow_dispatch`.
-
-One-time setup — add an npm token as a repository secret:
-
-1. Create an npm **Automation** (or Granular Access, with publish rights) token
-   at <https://www.npmjs.com/settings/~/tokens>.
-2. In the repo, go to **Settings → Secrets and variables → Actions → New
-   repository secret** and add it as `NPM_TOKEN`.
-
-To cut a release:
-
-1. Bump the version locally and push the tag:
-   ```sh
-   npm version patch   # or minor / major
-   git push --follow-tags
-   ```
-2. Open the **Actions** tab → **Publish to npm** → **Run workflow**, choose the
-   dist-tag (`latest` / `next` / `beta`), and optionally tick **Dry run** to
-   verify the pipeline without publishing.
-
-The workflow typechecks, builds, verifies the publish artifacts, then runs
-`npm publish` with [provenance](https://docs.npmjs.com/generating-provenance-statements)
-(enabled by the `id-token: write` permission). `npm publish` rejects a version
-that already exists, so remember to bump first.
-
 ## License
 
 [MIT](./LICENSE) © kongyo2
