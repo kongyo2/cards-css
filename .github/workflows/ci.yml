@@ -48,3 +48,17 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm run format:check
+
+  build:
+    name: Build (publish artifacts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - name: Verify expected publish artifacts exist
+        run: test -f dist/index.js && test -f dist/holo-cards.css && test -f dist-types/index.d.ts

@@ -18,6 +18,14 @@
     "glare",
     "effect"
   ],
+  "homepage": "https://github.com/kongyo2/cards-css#readme",
+  "bugs": {
+    "url": "https://github.com/kongyo2/cards-css/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kongyo2/cards-css.git"
+  },
   "sideEffects": [
     "*.css"
   ],
@@ -37,6 +45,12 @@
     "dist-types",
     "src"
   ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --noEmit --watch",
