@@ -1,3 +1,5 @@
+import { Subscribers } from "./subscribers.js";
+
 export interface Orientation {
   alpha: number;
   beta: number;
@@ -36,7 +38,7 @@ const toRelative = (event?: DeviceOrientationEvent): RelativeOrientation => {
   };
 };
 
-const subscribers = new Set<(orientation: RelativeOrientation) => void>();
+const subscribers = new Subscribers<RelativeOrientation>(() => toRelative());
 let listening = false;
 
 const handleOrientation = (event: DeviceOrientationEvent): void => {
@@ -44,21 +46,17 @@ const handleOrientation = (event: DeviceOrientationEvent): void => {
     firstReading = false;
     baseOrientation = rawOrientation(event);
   }
-  const relative = toRelative(event);
-  for (const fn of subscribers) {
-    fn(relative);
-  }
+  subscribers.emit(toRelative(event));
 };
 
 export const subscribeOrientation = (fn: (orientation: RelativeOrientation) => void): (() => void) => {
-  subscribers.add(fn);
-  fn(toRelative());
+  const unsubscribe = subscribers.subscribe(fn);
   if (!listening && typeof window !== "undefined") {
     listening = true;
     window.addEventListener("deviceorientation", handleOrientation, true);
   }
   return () => {
-    subscribers.delete(fn);
+    unsubscribe();
     if (subscribers.size === 0 && listening && typeof window !== "undefined") {
       listening = false;
       window.removeEventListener("deviceorientation", handleOrientation, true);
