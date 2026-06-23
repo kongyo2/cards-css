@@ -1,5 +1,5 @@
 import { adjust, clamp, round } from "./math.js";
-import { Spring } from "./spring.js";
+import { Spring, type SpringSetOpts } from "./spring.js";
 import { CLASS } from "./dom.js";
 import { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 import { resetBaseOrientation, subscribeOrientation, type RelativeOrientation } from "./orientation.js";
@@ -28,11 +28,8 @@ interface Vec2 {
   [key: string]: number;
 }
 
-interface Glare {
-  x: number;
-  y: number;
+interface Glare extends Vec2 {
   o: number;
-  [key: string]: number;
 }
 
 export class HoloCard {
@@ -237,29 +234,28 @@ export class HoloCard {
     }
     this.endTimer = setTimeout(() => {
       this.setInteracting(false);
-
-      this.springRotate.stiffness = SNAP_STIFFNESS;
-      this.springRotate.damping = SNAP_DAMPING;
+      this.setSpringDynamics(SNAP_STIFFNESS, SNAP_DAMPING);
       void this.springRotate.set({ x: 0, y: 0 }, { soft: 1 });
-
-      this.springGlare.stiffness = SNAP_STIFFNESS;
-      this.springGlare.damping = SNAP_DAMPING;
       void this.springGlare.set({ x: 50, y: 50, o: 0 }, { soft: 1 });
-
-      this.springBackground.stiffness = SNAP_STIFFNESS;
-      this.springBackground.damping = SNAP_DAMPING;
       void this.springBackground.set({ x: 50, y: 50 }, { soft: 1 });
     }, delay);
   }
 
-  private updateSprings(background: Vec2, rotate: Vec2, glare: Glare): void {
-    this.springBackground.stiffness = SPRING_INTERACT.stiffness;
-    this.springBackground.damping = SPRING_INTERACT.damping;
-    this.springRotate.stiffness = SPRING_INTERACT.stiffness;
-    this.springRotate.damping = SPRING_INTERACT.damping;
-    this.springGlare.stiffness = SPRING_INTERACT.stiffness;
-    this.springGlare.damping = SPRING_INTERACT.damping;
+  private setSpringDynamics(stiffness: number, damping: number): void {
+    for (const spring of [this.springRotate, this.springGlare, this.springBackground]) {
+      spring.stiffness = stiffness;
+      spring.damping = damping;
+    }
+  }
 
+  private settle(opts: SpringSetOpts): void {
+    void this.springScale.set(1, opts);
+    void this.springTranslate.set({ x: 0, y: 0 }, opts);
+    void this.springRotateDelta.set({ x: 0, y: 0 }, opts);
+  }
+
+  private updateSprings(background: Vec2, rotate: Vec2, glare: Glare): void {
+    this.setSpringDynamics(SPRING_INTERACT.stiffness, SPRING_INTERACT.damping);
     void this.springBackground.set(background);
     void this.springRotate.set(rotate);
     void this.springGlare.set(glare);
@@ -342,17 +338,13 @@ export class HoloCard {
   }
 
   private retreat(): void {
-    void this.springScale.set(1, { soft: true });
-    void this.springTranslate.set({ x: 0, y: 0 }, { soft: true });
-    void this.springRotateDelta.set({ x: 0, y: 0 }, { soft: true });
+    this.settle({ soft: true });
     this.interactEnd(100);
   }
 
   private reset(): void {
     this.interactEnd(0);
-    void this.springScale.set(1, { hard: true });
-    void this.springTranslate.set({ x: 0, y: 0 }, { hard: true });
-    void this.springRotateDelta.set({ x: 0, y: 0 }, { hard: true });
+    this.settle({ hard: true });
     void this.springRotate.set({ x: 0, y: 0 }, { hard: true });
   }
 
@@ -422,12 +414,7 @@ export class HoloCard {
     let r = 0;
     this.showcaseStart = setTimeout(() => {
       this.setInteracting(true);
-      this.springRotate.stiffness = s;
-      this.springRotate.damping = d;
-      this.springGlare.stiffness = s;
-      this.springGlare.damping = d;
-      this.springBackground.stiffness = s;
-      this.springBackground.damping = d;
+      this.setSpringDynamics(s, d);
       if (!this.isVisible) {
         this.setInteracting(false);
         return;

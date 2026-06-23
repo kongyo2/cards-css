@@ -1,4 +1,5 @@
 import { loop, now, type TaskHandle } from "./ticker.js";
+import { Subscribers } from "./subscribers.js";
 
 export type SpringValue = number | Record<string, number>;
 
@@ -65,7 +66,7 @@ export class Spring<T extends SpringValue> {
   private task: TaskHandle | null = null;
   private lastTime = 0;
   private currentToken: object | null = null;
-  private readonly subscribers = new Set<(value: T) => void>();
+  private readonly subscribers = new Subscribers<T>(() => this.value);
 
   constructor(value: T, opts: SpringOpts = {}) {
     this.value = value;
@@ -81,17 +82,11 @@ export class Spring<T extends SpringValue> {
   }
 
   subscribe(fn: (value: T) => void): () => void {
-    this.subscribers.add(fn);
-    fn(this.value);
-    return () => {
-      this.subscribers.delete(fn);
-    };
+    return this.subscribers.subscribe(fn);
   }
 
   private notify(): void {
-    for (const fn of this.subscribers) {
-      fn(this.value);
-    }
+    this.subscribers.emit(this.value);
   }
 
   set(newValue: T, opts: SpringSetOpts = {}): Promise<void> {

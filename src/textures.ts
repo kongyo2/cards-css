@@ -45,6 +45,18 @@ const pick = <T>(rng: () => number, items: readonly T[]): T => {
 
 const rand = (rng: () => number, min: number, max: number): number => min + rng() * (max - min);
 
+const circle = (
+  x: number,
+  y: number,
+  r: number,
+  fill: string,
+  opacity: number,
+  opts: { rDigits?: number; filter?: string } = {},
+): string => {
+  const filter = opts.filter ? ` filter='url(${opts.filter})'` : "";
+  return `<circle cx='${x.toFixed(1)}' cy='${y.toFixed(1)}' r='${r.toFixed(opts.rDigits ?? 2)}' fill='${fill}' opacity='${opacity.toFixed(2)}'${filter}/>`;
+};
+
 const discreteTable = (keep: number, steps = 32): string => {
   const ones = Math.min(steps, Math.max(1, Math.round(steps * keep)));
   const cells: string[] = [];
@@ -99,10 +111,14 @@ const clusterBlobs = (
 ): string => {
   let blobs = "";
   for (let i = 0; i < count; i += 1) {
-    const cx = (rng() * width).toFixed(1);
-    const cy = (rng() * height).toFixed(1);
-    const r = rand(rng, radius[0], radius[1]).toFixed(1);
-    blobs += `<circle cx='${cx}' cy='${cy}' r='${r}' fill='${pick(rng, palette)}' opacity='${rand(rng, opacity[0], opacity[1]).toFixed(2)}'/>`;
+    blobs += circle(
+      rng() * width,
+      rng() * height,
+      rand(rng, radius[0], radius[1]),
+      pick(rng, palette),
+      rand(rng, opacity[0], opacity[1]),
+      { rDigits: 1 },
+    );
   }
   return `<g filter='url(${blurId})'>${blobs}</g>`;
 };
@@ -110,12 +126,12 @@ const clusterBlobs = (
 const brightStars = (rng: () => number, width: number, height: number, count: number, glowId: string): string => {
   let stars = "";
   for (let i = 0; i < count; i += 1) {
-    const cx = (rng() * width).toFixed(1);
-    const cy = (rng() * height).toFixed(1);
+    const x = rng() * width;
+    const y = rng() * height;
     const r = rand(rng, 1.1, 2.6);
     stars +=
-      `<circle cx='${cx}' cy='${cy}' r='${(r * 2.6).toFixed(1)}' fill='#ffffff' opacity='0.14' filter='url(${glowId})'/>` +
-      `<circle cx='${cx}' cy='${cy}' r='${r.toFixed(2)}' fill='#ffffff' opacity='${rand(rng, 0.75, 1).toFixed(2)}'/>`;
+      circle(x, y, r * 2.6, "#ffffff", 0.14, { rDigits: 1, filter: glowId }) +
+      circle(x, y, r, "#ffffff", rand(rng, 0.75, 1));
   }
   return stars;
 };
@@ -130,9 +146,13 @@ const ringClusters = (rng: () => number, width: number, height: number, count: n
     for (let k = 0; k < dots; k += 1) {
       const angle = rng() * Math.PI * 2;
       const rr = radius * rand(rng, 0.78, 1.28);
-      const x = (cx + Math.cos(angle) * rr).toFixed(1);
-      const y = (cy + Math.sin(angle) * rr * 1.05).toFixed(1);
-      out += `<circle cx='${x}' cy='${y}' r='${rand(rng, 0.5, 1.5).toFixed(2)}' fill='${color}' opacity='${rand(rng, 0.4, 0.9).toFixed(2)}'/>`;
+      out += circle(
+        cx + Math.cos(angle) * rr,
+        cy + Math.sin(angle) * rr * 1.05,
+        rand(rng, 0.5, 1.5),
+        color,
+        rand(rng, 0.4, 0.9),
+      );
     }
   }
   return out;
@@ -182,9 +202,19 @@ export const glitterTexture = (seed: number): string => {
   return svgToDataUri(svg);
 };
 
-const cosmosBottom = (seed: number): string => {
+const cosmosLayer = (
+  idBase: string,
+  seed: number,
+  layers: readonly SpeckleLayer[],
+  paint: (rng: () => number, body: string) => string,
+): string => {
   const rng = mulberry32(seed);
-  const { defs, body } = speckleField(
+  const { defs, body } = speckleField(idBase, seed, layers, false);
+  return svgToDataUri(`${cosmosSvgOpen(defs)}${paint(rng, body)}</svg>`);
+};
+
+const cosmosBottom = (seed: number): string =>
+  cosmosLayer(
     "csb",
     seed,
     [
@@ -193,26 +223,24 @@ const cosmosBottom = (seed: number): string => {
       { freq: 0.76, keep: 0.05, color: "#9fb6ff", opacity: 0.85 },
       { freq: 0.78, keep: 0.04, color: "#ffc2d8", opacity: 0.8 },
     ],
-    false,
+    (rng, body) => {
+      const clusters = clusterBlobs(
+        rng,
+        COSMOS_W,
+        COSMOS_H,
+        26,
+        ["#465777", "#6d6088", "#9a7790", "#aab3cc", "#566f9e"],
+        "#blur",
+        [5, 14],
+        [0.18, 0.4],
+      );
+      const stars = brightStars(rng, COSMOS_W, COSMOS_H, 24, "#glow");
+      return `<rect width='100%' height='100%' fill='#04030c'/>${clusters}${body}${stars}`;
+    },
   );
-  const clusters = clusterBlobs(
-    rng,
-    COSMOS_W,
-    COSMOS_H,
-    26,
-    ["#465777", "#6d6088", "#9a7790", "#aab3cc", "#566f9e"],
-    "#blur",
-    [5, 14],
-    [0.18, 0.4],
-  );
-  const stars = brightStars(rng, COSMOS_W, COSMOS_H, 24, "#glow");
-  const svg = cosmosSvgOpen(defs) + `<rect width='100%' height='100%' fill='#04030c'/>${clusters}${body}${stars}</svg>`;
-  return svgToDataUri(svg);
-};
 
-const cosmosMiddle = (seed: number): string => {
-  const rng = mulberry32(seed);
-  const { defs, body } = speckleField(
+const cosmosMiddle = (seed: number): string =>
+  cosmosLayer(
     "csm",
     seed,
     [
@@ -221,37 +249,34 @@ const cosmosMiddle = (seed: number): string => {
       { freq: 0.52, keep: 0.055, color: "#7a1f6b", opacity: 0.85 },
       { freq: 0.5, keep: 0.03, color: "#c87a3a", opacity: 0.85 },
     ],
-    false,
+    (rng, body) => {
+      const clusters = clusterBlobs(
+        rng,
+        COSMOS_W,
+        COSMOS_H,
+        16,
+        ["#241a4e", "#3a2168", "#1a1430"],
+        "#blur",
+        [7, 18],
+        [0.45, 0.8],
+      );
+      return `${clusters}${body}`;
+    },
   );
-  const clusters = clusterBlobs(
-    rng,
-    COSMOS_W,
-    COSMOS_H,
-    16,
-    ["#241a4e", "#3a2168", "#1a1430"],
-    "#blur",
-    [7, 18],
-    [0.45, 0.8],
-  );
-  const svg = cosmosSvgOpen(defs) + `${clusters}${body}</svg>`;
-  return svgToDataUri(svg);
-};
 
-const cosmosTop = (seed: number): string => {
-  const rng = mulberry32(seed);
-  const { defs, body } = speckleField(
+const cosmosTop = (seed: number): string =>
+  cosmosLayer(
     "cst",
     seed,
     [
       { freq: 0.62, keep: 0.06, color: "#6a6a76", opacity: 0.85 },
       { freq: 0.52, keep: 0.035, color: "#42424c", opacity: 0.9 },
     ],
-    false,
+    (rng, body) => {
+      const rings = ringClusters(rng, COSMOS_W, COSMOS_H, 7, "#54545f");
+      return `${body}${rings}`;
+    },
   );
-  const rings = ringClusters(rng, COSMOS_W, COSMOS_H, 7, "#54545f");
-  const svg = cosmosSvgOpen(defs) + `${body}${rings}</svg>`;
-  return svgToDataUri(svg);
-};
 
 export const generateTextures = (options: TextureOptions = {}): Textures => {
   const seed = options.seed ?? DEFAULT_TEXTURE_SEED;
