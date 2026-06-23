@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-types
+build
+coverage
+*.min.js
+package-lock.json
+*.md

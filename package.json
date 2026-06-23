@@ -1,0 +1,60 @@
+{
+  "name": "@kongyo2/cards-css",
+  "version": "0.1.0",
+  "description": "Framework-agnostic holographic trading-card effect (tilt, shine, glare, holo / reverse / cosmos / glitter) with procedurally code-generated textures.",
+  "type": "module",
+  "license": "MIT",
+  "author": "kongyo2",
+  "keywords": [
+    "holographic",
+    "holo",
+    "foil",
+    "trading-card",
+    "card",
+    "css",
+    "3d",
+    "tilt",
+    "shine",
+    "glare",
+    "effect"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/holo-cards.css",
+    "./holo-cards.css": "./dist/holo-cards.css"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist-types/index.d.ts",
+  "files": [
+    "dist",
+    "dist-types",
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "build:js": "tsc",
+    "build:css": "node scripts/build-css.mjs",
+    "build": "tsc && node scripts/build-css.mjs",
+    "clean": "node -e \"const fs=require('node:fs');for(const p of ['dist','dist-types','tsconfig.tsbuildinfo'])fs.rmSync(p,{recursive:true,force:true})\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "oxlint --format agent",
+    "lint:fix": "oxlint --fix",
+    "lint:strict": "oxlint --deny-warnings",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "oxlint": "^1.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  }
+}

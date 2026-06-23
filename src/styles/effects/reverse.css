@@ -1,0 +1,55 @@
+.holo-card[data-effect="reverse"] {
+  --foil-brightness: 0.55;
+}
+
+.holo-card[data-effect="reverse"] .holo-card__shine {
+  background-image:
+    radial-gradient(circle at var(--pointer-x) var(--pointer-y), #fff 5%, #000 50%, #fff 80%),
+    linear-gradient(-45deg, #000 15%, #fff, #000 85%), var(--foil);
+
+  background-blend-mode: soft-light, difference;
+  background-size:
+    120% 120%,
+    200% 200%,
+    cover;
+  background-position:
+    center center,
+    calc(100% * var(--pointer-from-left)) calc(100% * var(--pointer-from-top)),
+    center center;
+
+  filter: brightness(var(--foil-brightness)) contrast(1.5) saturate(1);
+  mix-blend-mode: color-dodge;
+
+  opacity: calc((1.5 * var(--card-opacity)) - var(--pointer-from-center));
+}
+
+.holo-card[data-effect="reverse"] .holo-card__glare {
+  opacity: var(--card-opacity);
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x) var(--pointer-y),
+    hsla(0, 0%, 100%, 0.8) 10%,
+    hsla(0, 0%, 100%, 0.5) 20%,
+    hsla(0, 0%, 0%, 0.75) 90%
+  );
+
+  filter: brightness(0.7) contrast(1.5);
+}
+
+.holo-card[data-effect="reverse"] .holo-card__glare::after {
+  content: "";
+  opacity: var(--card-opacity);
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x) var(--pointer-y),
+    hsl(0, 0%, 100%) 10%,
+    hsla(0, 0%, 100%, 0.5) 20%,
+    hsla(0, 0%, 0%, 0.5) 120%
+  );
+
+  filter: brightness(1) contrast(1.5);
+}
+
+.holo-card[data-effect="reverse"]:not(.holo-card--masked) .holo-card__shine {
+  --foil: none;
+}
