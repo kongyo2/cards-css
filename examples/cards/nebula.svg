@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="919" viewBox="0 0 660 919" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0d0726" />
+      <stop offset="0.55" stop-color="#241248" />
+      <stop offset="1" stop-color="#05030f" />
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="660" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e7d6ff" />
+      <stop offset="0.5" stop-color="#9a6bd6" />
+      <stop offset="1" stop-color="#4b2a86" />
+    </linearGradient>
+    <radialGradient id="art" cx="0.5" cy="0.42" r="0.85">
+      <stop offset="0" stop-color="#2a1456" />
+      <stop offset="1" stop-color="#070318" />
+    </radialGradient>
+    <radialGradient id="planet" cx="0.4" cy="0.36" r="0.7">
+      <stop offset="0" stop-color="#ffd9f4" />
+      <stop offset="0.4" stop-color="#c061e6" />
+      <stop offset="1" stop-color="#3a1670" />
+    </radialGradient>
+  </defs>
+
+  <rect width="660" height="919" fill="url(#bg)" />
+  <rect x="16" y="16" width="628" height="887" rx="30" fill="none" stroke="url(#rim)" stroke-width="7" />
+  <rect x="30" y="30" width="600" height="859" rx="22" fill="none" stroke="#a07ed6" stroke-width="1.5" opacity="0.55" />
+
+  <rect x="44" y="40" width="572" height="86" rx="16" fill="#1b0f3c" stroke="url(#rim)" stroke-width="3" />
+  <g transform="translate(92 83)" fill="#e7d6ff">
+    <polygon points="0,-26 7,-7 26,0 7,7 0,26 -7,7 -26,0 -7,-7" />
+  </g>
+  <text x="138" y="96" font-family="Georgia, 'Times New Roman', serif" font-size="44" font-weight="700" fill="#ecdcff">Nebula</text>
+  <text x="592" y="76" font-family="Georgia, serif" font-size="24" font-weight="700" fill="#d8c2ff" text-anchor="end">HP 120</text>
+  <text x="592" y="104" font-family="Georgia, serif" font-size="18" fill="#b48bf0" text-anchor="end">Cosmic</text>
+
+  <rect x="48" y="146" width="564" height="520" rx="14" fill="url(#art)" stroke="url(#rim)" stroke-width="3" />
+  <clipPath id="artclip"><rect x="48" y="146" width="564" height="520" rx="14" /></clipPath>
+  <g clip-path="url(#artclip)">
+    <g fill="#fff">
+      <circle cx="120" cy="220" r="2.2" opacity="0.9" />
+      <circle cx="200" cy="300" r="1.6" opacity="0.7" />
+      <circle cx="520" cy="240" r="2.4" opacity="0.9" />
+      <circle cx="560" cy="360" r="1.6" opacity="0.6" />
+      <circle cx="100" cy="470" r="2" opacity="0.8" />
+      <circle cx="170" cy="600" r="2.4" opacity="0.9" />
+      <circle cx="540" cy="560" r="2" opacity="0.8" />
+      <circle cx="470" cy="620" r="1.6" opacity="0.6" />
+      <circle cx="300" cy="190" r="1.6" opacity="0.7" />
+      <circle cx="380" cy="630" r="2.2" opacity="0.85" />
+    </g>
+    <g fill="none" stroke="#b07fe6" stroke-width="2.5" opacity="0.55">
+      <ellipse cx="330" cy="432" rx="216" ry="74" transform="rotate(-24 330 432)" />
+      <ellipse cx="330" cy="432" rx="170" ry="200" transform="rotate(-24 330 432)" />
+    </g>
+    <circle cx="330" cy="432" r="104" fill="url(#planet)" />
+    <path d="M226 432 a104 104 0 0 1 208 0 Z" fill="#ffffff" opacity="0.08" />
+    <g fill="#ffe9fb">
+      <polygon points="486,470 492,452 498,470 516,476 498,482 492,500 486,482 468,476" />
+      <polygon points="176,372 181,358 186,372 200,377 186,382 181,396 176,382 162,377" />
+    </g>
+  </g>
+
+  <rect x="48" y="686" width="564" height="150" rx="14" fill="#0d0726" stroke="url(#rim)" stroke-width="2" />
+  <text x="72" y="730" font-family="Georgia, serif" font-size="27" font-weight="700" fill="#d8c2ff">Gravity Well</text>
+  <text x="72" y="766" font-family="Georgia, serif" font-size="19" fill="#cdbcf0">Pull every basic card into the active slot,</text>
+  <text x="72" y="793" font-family="Georgia, serif" font-size="19" fill="#cdbcf0">bending the field around a collapsing star.</text>
+
+  <text x="72" y="862" font-family="Georgia, serif" font-size="16" fill="#a07ed6" opacity="0.85">&#9733;&#9733;&#9733;&#9733;&#9733;  &#183;  Astral Set 77 / 99</text>
+  <text x="588" y="862" font-family="Georgia, serif" font-size="16" fill="#a07ed6" text-anchor="end" opacity="0.85">cards-css</text>
+</svg>

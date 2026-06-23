@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="919" viewBox="0 0 660 919" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2b0a06" />
+      <stop offset="0.55" stop-color="#5e1206" />
+      <stop offset="1" stop-color="#160402" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="660" y2="919" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffe9a8" />
+      <stop offset="0.5" stop-color="#c98a2e" />
+      <stop offset="1" stop-color="#7a4a12" />
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff3c4" />
+      <stop offset="0.45" stop-color="#ff9d3c" />
+      <stop offset="1" stop-color="#7a1402" />
+    </radialGradient>
+    <radialGradient id="art" cx="0.5" cy="0.4" r="0.78">
+      <stop offset="0" stop-color="#b3370b" />
+      <stop offset="1" stop-color="#2a0805" />
+    </radialGradient>
+    <linearGradient id="bird" x1="330" y1="250" x2="330" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff3c4" />
+      <stop offset="0.5" stop-color="#ffb24c" />
+      <stop offset="1" stop-color="#ff5722" />
+    </linearGradient>
+  </defs>
+
+  <rect width="660" height="919" fill="url(#bg)" />
+  <rect x="16" y="16" width="628" height="887" rx="30" fill="none" stroke="url(#gold)" stroke-width="7" />
+  <rect x="30" y="30" width="600" height="859" rx="22" fill="none" stroke="#caa24e" stroke-width="1.5" opacity="0.6" />
+
+  <rect x="44" y="40" width="572" height="86" rx="16" fill="#3a0d07" stroke="url(#gold)" stroke-width="3" />
+  <circle cx="92" cy="83" r="26" fill="url(#sun)" />
+  <text x="134" y="96" font-family="Georgia, 'Times New Roman', serif" font-size="44" font-weight="700" fill="#ffe9c7">Phoenix</text>
+  <text x="592" y="76" font-family="Georgia, serif" font-size="24" font-weight="700" fill="#ffd97a" text-anchor="end">HP 130</text>
+  <text x="592" y="104" font-family="Georgia, serif" font-size="18" fill="#ff9d3c" text-anchor="end">Fire</text>
+
+  <rect x="48" y="146" width="564" height="520" rx="14" fill="url(#art)" stroke="url(#gold)" stroke-width="3" />
+  <clipPath id="artclip"><rect x="48" y="146" width="564" height="520" rx="14" /></clipPath>
+  <g clip-path="url(#artclip)">
+    <g transform="translate(330 432)" fill="#ffce6e" opacity="0.4">
+      <polygon points="0,-220 22,-120 -22,-120" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(30)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(60)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(90)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(120)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(150)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(180)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(210)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(240)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(270)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(300)" />
+      <polygon points="0,-220 22,-120 -22,-120" transform="rotate(330)" />
+    </g>
+    <circle cx="330" cy="432" r="132" fill="url(#sun)" opacity="0.92" />
+    <g fill="url(#bird)">
+      <path d="M330 322 C300 360 286 410 300 470 C260 452 196 440 150 470 C214 470 236 500 250 520 C218 522 188 540 168 566 C236 552 290 556 330 566 C370 556 424 552 492 566 C472 540 442 522 410 520 C424 500 446 470 510 470 C464 440 400 452 360 470 C374 410 360 360 330 322 Z" />
+      <path d="M330 540 L308 660 L330 632 L352 660 Z" />
+      <circle cx="330" cy="312" r="30" />
+      <path d="M330 292 L356 278 L330 266 Z" />
+    </g>
+    <circle cx="320" cy="306" r="5" fill="#3a0d07" />
+  </g>
+
+  <rect x="48" y="686" width="564" height="150" rx="14" fill="#1c0604" stroke="url(#gold)" stroke-width="2" />
+  <text x="72" y="730" font-family="Georgia, serif" font-size="27" font-weight="700" fill="#ffd97a">Rebirth Flame</text>
+  <text x="72" y="766" font-family="Georgia, serif" font-size="19" fill="#ffd9b0">When this card is knocked out, return it to</text>
+  <text x="72" y="793" font-family="Georgia, serif" font-size="19" fill="#ffd9b0">play with half its HP as embers reignite.</text>
+
+  <text x="72" y="862" font-family="Georgia, serif" font-size="16" fill="#caa24e" opacity="0.85">&#9733;&#9733;&#9733;&#9733;&#9734;  &#183;  Ember Set 04 / 99</text>
+  <text x="588" y="862" font-family="Georgia, serif" font-size="16" fill="#caa24e" text-anchor="end" opacity="0.85">cards-css</text>
+</svg>
