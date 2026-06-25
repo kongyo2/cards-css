@@ -32,6 +32,11 @@
   --pointer-from-center: 0;
   --pointer-from-top: var(--pointer-from-center);
   --pointer-from-left: var(--pointer-from-center);
+  --pointer-dx: 0;
+  --pointer-dy: 0;
+  --tilt-x: 0;
+  --tilt-y: 0;
+  --card-active: 0;
 }
 
 .holo-card {
@@ -42,6 +47,22 @@
   --space: 5%;
   --angle: 133deg;
   --imgsize: cover;
+
+  --hc-brightness: 1;
+  --hc-contrast: 1;
+  --hc-saturate: 1;
+  --hc-glare-opacity: 1;
+  --hc-shine-opacity: 1;
+
+  --mask-size: cover;
+  --mask-position: center center;
+  --mask-repeat: no-repeat;
+
+  --layer-blend: normal;
+  --layer-size: cover;
+  --layer-position: center;
+  --layer-opacity: 1;
+  --layer-parallax: 0;
 
   --red: #f80e35;
   --yellow: #eedf10;
@@ -212,9 +233,10 @@ button.holo-card__rotator {
   background: transparent;
   background-size: cover;
   background-position: center;
-  filter: brightness(0.85) contrast(2.75) saturate(0.65);
+  filter: brightness(calc(0.85 * var(--hc-brightness))) contrast(calc(2.75 * var(--hc-contrast)))
+    saturate(calc(0.65 * var(--hc-saturate)));
   mix-blend-mode: color-dodge;
-  opacity: var(--card-opacity);
+  opacity: calc(var(--card-opacity) * var(--hc-shine-opacity));
 }
 
 .holo-card__shine::before,
@@ -249,7 +271,7 @@ button.holo-card__rotator {
     hsla(0, 0%, 100%, 0.65) 20%,
     hsla(0, 0%, 0%, 0.5) 90%
   );
-  opacity: var(--card-opacity);
+  opacity: calc(var(--card-opacity) * var(--hc-glare-opacity));
   mix-blend-mode: overlay;
 }
 
@@ -257,6 +279,67 @@ button.holo-card__rotator {
 .holo-card--masked .holo-card__shine::before,
 .holo-card--masked .holo-card__shine::after {
   mask-image: var(--mask);
+  mask-size: var(--mask-size);
+  mask-position: var(--mask-position);
+  mask-repeat: var(--mask-repeat);
+}
+
+.holo-card--mask-card .holo-card__front {
+  mask-image: var(--mask);
+  mask-size: var(--mask-size);
+  mask-position: var(--mask-position);
+  mask-repeat: var(--mask-repeat);
+}
+
+.holo-card__layers {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.holo-card__layer {
+  grid-area: 1/1;
+  background-image: var(--layer-image, none);
+  background-size: var(--layer-size);
+  background-position: var(--layer-position);
+  background-repeat: no-repeat;
+  mix-blend-mode: var(--layer-blend);
+  opacity: var(--layer-opacity);
+  transform: translate3d(
+    calc(var(--pointer-dx) * var(--layer-parallax) * 1px),
+    calc(var(--pointer-dy) * var(--layer-parallax) * 1px),
+    0.02px
+  );
+  will-change: transform, opacity;
+}
+
+.holo-card__layer--masked {
+  mask-image: var(--layer-mask);
   mask-size: cover;
-  mask-position: center center;
+  mask-position: center;
+}
+
+.holo-card__content {
+  transform: translate3d(0px, 0px, 0.01px);
+}
+
+.holo-card__content *,
+.holo-card__overlay *,
+.holo-card__layer * {
+  width: auto;
+  display: revert;
+  grid-area: auto;
+  aspect-ratio: auto;
+  overflow: revert;
+  border-radius: revert;
+}
+
+.holo-card__overlay {
+  z-index: 4;
+  transform: translateZ(2px);
+  pointer-events: none;
+}
+
+.holo-card__overlay--interactive,
+.holo-card__overlay--interactive * {
+  pointer-events: auto;
 }

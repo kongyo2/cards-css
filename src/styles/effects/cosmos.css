@@ -37,7 +37,7 @@
     400% 900%,
     cover;
 
-  filter: brightness(1) contrast(1) saturate(0.8);
+  filter: brightness(var(--hc-brightness)) contrast(var(--hc-contrast)) saturate(calc(0.8 * var(--hc-saturate)));
   mix-blend-mode: color-dodge;
 }
 
@@ -75,7 +75,8 @@
     400% 900%,
     cover;
 
-  filter: brightness(1.25) contrast(1.75) saturate(0.8);
+  filter: brightness(calc(1.25 * var(--hc-brightness))) contrast(calc(1.75 * var(--hc-contrast)))
+    saturate(calc(0.8 * var(--hc-saturate)));
   mix-blend-mode: overlay;
 }
 
@@ -113,7 +114,8 @@
     400% 900%,
     cover;
 
-  filter: brightness(1.25) contrast(1.75) saturate(0.8);
+  filter: brightness(calc(1.25 * var(--hc-brightness))) contrast(calc(1.75 * var(--hc-contrast)))
+    saturate(calc(0.8 * var(--hc-saturate)));
   mix-blend-mode: multiply;
 }
 
@@ -125,7 +127,7 @@
   );
   filter: brightness(0.75) contrast(2) saturate(2);
   mix-blend-mode: overlay;
-  opacity: calc(var(--card-opacity) * (0.25 + var(--pointer-from-center)));
+  opacity: calc(var(--card-opacity) * (0.25 + var(--pointer-from-center)) * var(--hc-glare-opacity));
 }
 
 .holo-card[data-effect="cosmos"] .holo-card__glare::after {

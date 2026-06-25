@@ -1,6 +1,6 @@
 {
   "name": "@kongyo2/cards-css",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Framework-agnostic holographic trading-card effect (tilt, shine, glare, holo / reverse / cosmos / glitter) with procedurally code-generated textures.",
   "type": "module",
   "license": "MIT",

@@ -3,10 +3,19 @@ import { Subscribers } from "./subscribers.js";
 
 export type SpringValue = number | Record<string, number>;
 
-export interface SpringOpts {
+export interface SpringDynamics {
   stiffness?: number;
   damping?: number;
   precision?: number;
+}
+
+export interface SpringOpts extends SpringDynamics {
+  /**
+   * Per-key dynamics overrides for object springs. Each key (e.g. `x`, `y`, `o`)
+   * may carry its own stiffness/damping/precision, giving asymmetric, independent
+   * motion per axis. Keys without an entry fall back to the base dynamics.
+   */
+  axes?: Record<string, SpringDynamics>;
 }
 
 export interface SpringSetOpts {
@@ -14,32 +23,57 @@ export interface SpringSetOpts {
   soft?: boolean | number;
 }
 
-interface TickContext {
+interface FrameContext {
   invMass: number;
   stiffness: number;
   damping: number;
   precision: number;
+  axes: Record<string, SpringDynamics> | undefined;
   settled: boolean;
   dt: number;
 }
 
-const tickScalar = (ctx: TickContext, lastValue: number, currentValue: number, targetValue: number): number => {
+interface AxisDynamics {
+  stiffness: number;
+  damping: number;
+  precision: number;
+}
+
+const tickScalar = (
+  ctx: FrameContext,
+  axis: AxisDynamics,
+  lastValue: number,
+  currentValue: number,
+  targetValue: number,
+): number => {
   const delta = targetValue - currentValue;
   const velocity = (currentValue - lastValue) / (ctx.dt || 1 / 60);
-  const spring = ctx.stiffness * delta;
-  const damper = ctx.damping * velocity;
+  const spring = axis.stiffness * delta;
+  const damper = axis.damping * velocity;
   const acceleration = (spring - damper) * ctx.invMass;
   const d = (velocity + acceleration) * ctx.dt;
-  if (Math.abs(d) < ctx.precision && Math.abs(delta) < ctx.precision) {
+  if (Math.abs(d) < axis.precision && Math.abs(delta) < axis.precision) {
     return targetValue;
   }
   ctx.settled = false;
   return currentValue + d;
 };
 
-const tick = <T extends SpringValue>(ctx: TickContext, last: T, current: T, target: T): T => {
+const resolveAxis = (ctx: FrameContext, key: string): AxisDynamics => {
+  const override = ctx.axes?.[key];
+  if (!override) {
+    return ctx;
+  }
+  return {
+    stiffness: override.stiffness ?? ctx.stiffness,
+    damping: override.damping ?? ctx.damping,
+    precision: override.precision ?? ctx.precision,
+  };
+};
+
+const tick = <T extends SpringValue>(ctx: FrameContext, last: T, current: T, target: T): T => {
   if (typeof current === "number") {
-    return tickScalar(ctx, last as number, current, target as number) as T;
+    return tickScalar(ctx, ctx, last as number, current, target as number) as T;
   }
   const cur = current as Record<string, number>;
   const lst = last as Record<string, number>;
@@ -47,7 +81,7 @@ const tick = <T extends SpringValue>(ctx: TickContext, last: T, current: T, targ
   const result: Record<string, number> = {};
   for (const key in cur) {
     const c = cur[key] ?? 0;
-    result[key] = tickScalar(ctx, lst[key] ?? c, c, tgt[key] ?? c);
+    result[key] = tickScalar(ctx, resolveAxis(ctx, key), lst[key] ?? c, c, tgt[key] ?? c);
   }
   return result as T;
 };
@@ -56,6 +90,7 @@ export class Spring<T extends SpringValue> {
   stiffness: number;
   damping: number;
   precision: number;
+  axes: Record<string, SpringDynamics> | undefined;
 
   private value: T;
   private lastValue: T;
@@ -75,6 +110,7 @@ export class Spring<T extends SpringValue> {
     this.stiffness = opts.stiffness ?? 0.15;
     this.damping = opts.damping ?? 0.8;
     this.precision = opts.precision ?? 0.01;
+    this.axes = opts.axes;
   }
 
   get current(): T {
@@ -123,11 +159,12 @@ export class Spring<T extends SpringValue> {
           return false;
         }
         this.invMass = Math.min(this.invMass + this.invMassRecoveryRate, 1);
-        const ctx: TickContext = {
+        const ctx: FrameContext = {
           invMass: this.invMass,
           stiffness: this.stiffness,
           damping: this.damping,
           precision: this.precision,
+          axes: this.axes,
           settled: true,
           dt: ((time - this.lastTime) * 60) / 1000,
         };
