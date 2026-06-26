@@ -194,6 +194,11 @@ button.holo-card__rotator {
   transform: translate3d(0px, 0px, 0.01px);
 }
 
+.holo-card__rotator img.holo-card__image {
+  height: 100%;
+  object-fit: var(--imgsize);
+}
+
 .holo-card__back {
   background-color: var(--card-back);
   transform: rotateY(180deg) translateZ(1px);
@@ -284,7 +289,8 @@ button.holo-card__rotator {
   mask-repeat: var(--mask-repeat);
 }
 
-.holo-card--mask-card .holo-card__front {
+.holo-card--mask-card .holo-card__front,
+.holo-card--mask-card .holo-card__back {
   mask-image: var(--mask);
   mask-size: var(--mask-size);
   mask-position: var(--mask-position);
