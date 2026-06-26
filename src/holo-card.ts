@@ -87,7 +87,7 @@ interface ResolvedShowcase {
   loop: boolean;
   speed: number;
   intensity: number;
-  dynamics: { stiffness: number; damping: number };
+  dynamics: BaseDynamics;
 }
 
 const resolveShowcase = (showcase: boolean | ShowcaseOptions | undefined): ResolvedShowcase => {
@@ -98,10 +98,7 @@ const resolveShowcase = (showcase: boolean | ShowcaseOptions | undefined): Resol
     loop: opts.loop ?? false,
     speed: opts.speed ?? 0.05,
     intensity: opts.intensity ?? 25,
-    dynamics: {
-      stiffness: opts.spring?.stiffness ?? 0.02,
-      damping: opts.spring?.damping ?? 0.5,
-    },
+    dynamics: resolveDynamics({ stiffness: 0.02, damping: 0.5 }, opts.spring),
   };
 };
 
@@ -347,12 +344,25 @@ export class HoloCard {
 
     if (this.options.activateOnClick) {
       const onClick = (): void => this.toggleActive();
-      const onBlur = (): void => this.deactivate();
+      const onBlur = (event: FocusEvent): void => {
+        const next = event.relatedTarget;
+        if (next instanceof Node && this.element.contains(next)) {
+          return;
+        }
+        this.deactivate();
+      };
       this.rotator.addEventListener("click", onClick);
       this.rotator.addEventListener("blur", onBlur);
       this.rotator.tabIndex = this.rotator.tabIndex >= 0 ? this.rotator.tabIndex : 0;
       this.cleanups.push(() => this.rotator.removeEventListener("click", onClick));
       this.cleanups.push(() => this.rotator.removeEventListener("blur", onBlur));
+
+      const interactiveOverlay = this.element.querySelector<HTMLElement>(`.${CLASS.overlayInteractive}`);
+      if (interactiveOverlay) {
+        const stopClick = (event: Event): void => event.stopPropagation();
+        interactiveOverlay.addEventListener("click", stopClick);
+        this.cleanups.push(() => interactiveOverlay.removeEventListener("click", stopClick));
+      }
 
       const onScroll = (): void => this.reposition();
       window.addEventListener("scroll", onScroll, { passive: true });
@@ -631,7 +641,7 @@ export class HoloCard {
     let r = 0;
     this.showcaseStart = setTimeout(() => {
       this.setInteracting(true);
-      this.setGroupDynamics({ stiffness: config.dynamics.stiffness, damping: config.dynamics.damping });
+      this.setGroupDynamics(config.dynamics);
       if (!this.isVisible) {
         this.setInteracting(false);
         return;

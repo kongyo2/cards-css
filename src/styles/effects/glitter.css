@@ -40,8 +40,8 @@
   background-blend-mode: color-burn;
 
   mix-blend-mode: lighten;
-  filter: brightness(var(--hc-brightness)) contrast(var(--hc-contrast)) saturate(var(--hc-saturate));
-  opacity: calc(0.5 * var(--hc-shine-opacity));
+  filter: brightness(1) contrast(1) saturate(1);
+  opacity: 0.5;
 }
 
 .holo-card[data-effect="glitter"] .holo-card__shine::after {
@@ -61,8 +61,7 @@
 
   background-size: 400% 800%;
   background-position: calc(50% + (50% - var(--background-x)) * 3) calc(50% + (50% - var(--background-y)) * 3);
-  filter: brightness(calc((0.75 - (var(--pointer-from-center) * 0.5)) * var(--hc-brightness)))
-    contrast(var(--hc-contrast)) saturate(var(--hc-saturate));
+  filter: brightness(calc(0.75 - (var(--pointer-from-center) * 0.5))) contrast(1) saturate(1);
   mix-blend-mode: saturation;
 }
 
