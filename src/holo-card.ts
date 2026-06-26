@@ -344,7 +344,7 @@ export class HoloCard {
 
     if (this.options.activateOnClick) {
       const onClick = (): void => this.toggleActive();
-      const onBlur = (event: FocusEvent): void => {
+      const onFocusOut = (event: FocusEvent): void => {
         const next = event.relatedTarget;
         if (next instanceof Node && this.element.contains(next)) {
           return;
@@ -352,10 +352,10 @@ export class HoloCard {
         this.deactivate();
       };
       this.rotator.addEventListener("click", onClick);
-      this.rotator.addEventListener("blur", onBlur);
+      this.rotator.addEventListener("focusout", onFocusOut);
       this.rotator.tabIndex = this.rotator.tabIndex >= 0 ? this.rotator.tabIndex : 0;
       this.cleanups.push(() => this.rotator.removeEventListener("click", onClick));
-      this.cleanups.push(() => this.rotator.removeEventListener("blur", onBlur));
+      this.cleanups.push(() => this.rotator.removeEventListener("focusout", onFocusOut));
 
       const interactiveOverlay = this.element.querySelector<HTMLElement>(`.${CLASS.overlayInteractive}`);
       if (interactiveOverlay) {
@@ -640,6 +640,10 @@ export class HoloCard {
     const amp = config.intensity;
     let r = 0;
     this.showcaseStart = setTimeout(() => {
+      if (this.endTimer) {
+        clearTimeout(this.endTimer);
+        this.endTimer = null;
+      }
       this.setInteracting(true);
       this.setGroupDynamics(config.dynamics);
       if (!this.isVisible) {
@@ -650,15 +654,15 @@ export class HoloCard {
         r += config.speed;
         void this.springRotate.set({ x: Math.sin(r) * amp, y: Math.cos(r) * amp });
         void this.springGlare.set({
-          x: amp * 2.2 + Math.sin(r) * amp * 2.2,
-          y: amp * 2.2 + Math.cos(r) * amp * 2.2,
+          x: 55 + Math.sin(r) * amp * 2.2,
+          y: 55 + Math.cos(r) * amp * 2.2,
           o: 0.8,
         });
         void this.springBackground.set({
-          x: amp * 0.8 + Math.sin(r) * amp * 0.8,
-          y: amp * 0.8 + Math.cos(r) * amp * 0.8,
+          x: 20 + Math.sin(r) * amp * 0.8,
+          y: 20 + Math.cos(r) * amp * 0.8,
         });
-        void this.springPointer.set({ x: 50 + Math.sin(r) * 40, y: 50 + Math.cos(r) * 40 });
+        void this.springPointer.set({ x: 50 + Math.sin(r) * amp * 1.6, y: 50 + Math.cos(r) * amp * 1.6 });
       }, 20);
       if (!config.loop) {
         this.showcaseEnd = setTimeout(() => {

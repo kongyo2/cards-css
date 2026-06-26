@@ -88,7 +88,9 @@
 .holo-card--masked[data-effect="glitter"] .holo-card__glare::after {
   content: "";
   mask-image: var(--mask);
-  mask-size: cover;
+  mask-size: var(--mask-size);
+  mask-position: var(--mask-position);
+  mask-repeat: var(--mask-repeat);
 
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),
@@ -99,5 +101,5 @@
 
   filter: brightness(1) contrast(1.5);
   mix-blend-mode: overlay;
-  opacity: var(--hc-glare-opacity);
+  opacity: 1;
 }

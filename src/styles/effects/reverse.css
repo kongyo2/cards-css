@@ -39,7 +39,7 @@
 
 .holo-card[data-effect="reverse"] .holo-card__glare::after {
   content: "";
-  opacity: calc(var(--card-opacity) * var(--hc-glare-opacity));
+  opacity: var(--card-opacity);
 
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),
