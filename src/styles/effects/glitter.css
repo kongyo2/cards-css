@@ -17,7 +17,7 @@
     55% 55%,
     center center;
   background-blend-mode: soft-light, color-burn;
-  filter: brightness(1) contrast(1) saturate(0.9);
+  filter: brightness(var(--hc-brightness)) contrast(var(--hc-contrast)) saturate(calc(0.9 * var(--hc-saturate)));
 }
 
 .holo-card[data-effect="glitter"] .holo-card__shine::before {
@@ -88,7 +88,9 @@
 .holo-card--masked[data-effect="glitter"] .holo-card__glare::after {
   content: "";
   mask-image: var(--mask);
-  mask-size: cover;
+  mask-size: var(--mask-size);
+  mask-position: var(--mask-position);
+  mask-repeat: var(--mask-repeat);
 
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),

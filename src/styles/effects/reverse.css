@@ -17,14 +17,15 @@
     calc(100% * var(--pointer-from-left)) calc(100% * var(--pointer-from-top)),
     center center;
 
-  filter: brightness(var(--foil-brightness)) contrast(1.5) saturate(1);
+  filter: brightness(calc(var(--foil-brightness) * var(--hc-brightness))) contrast(calc(1.5 * var(--hc-contrast)))
+    saturate(var(--hc-saturate));
   mix-blend-mode: color-dodge;
 
-  opacity: calc((1.5 * var(--card-opacity)) - var(--pointer-from-center));
+  opacity: calc(((1.5 * var(--card-opacity)) - var(--pointer-from-center)) * var(--hc-shine-opacity));
 }
 
 .holo-card[data-effect="reverse"] .holo-card__glare {
-  opacity: var(--card-opacity);
+  opacity: calc(var(--card-opacity) * var(--hc-glare-opacity));
 
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),

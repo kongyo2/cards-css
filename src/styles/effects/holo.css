@@ -43,7 +43,8 @@
     cover;
 
   background-blend-mode: overlay;
-  filter: brightness(1.1) contrast(1.1) saturate(1.2);
+  filter: brightness(calc(1.1 * var(--hc-brightness))) contrast(calc(1.1 * var(--hc-contrast)))
+    saturate(calc(1.2 * var(--hc-saturate)));
   mix-blend-mode: color-dodge;
 }
 
@@ -107,7 +108,7 @@
 }
 
 .holo-card[data-effect="holo"] .holo-card__glare {
-  opacity: calc(var(--card-opacity) * 0.8);
+  opacity: calc(var(--card-opacity) * 0.8 * var(--hc-glare-opacity));
   filter: brightness(0.8) contrast(1.5);
   mix-blend-mode: overlay;
 }

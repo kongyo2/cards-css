@@ -1,10 +1,10 @@
 import { adjust, clamp, round } from "./math.js";
-import { Spring, type SpringSetOpts } from "./spring.js";
-import { CLASS } from "./dom.js";
+import { Spring, type SpringSetOpts, type SpringOpts, type SpringDynamics } from "./spring.js";
+import { CLASS, applyVars, buildLayerElement, normalizeMask } from "./dom.js";
 import { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 import { resetBaseOrientation, subscribeOrientation, type RelativeOrientation } from "./orientation.js";
 import { generateTextures, texturesToCssVariables } from "./textures.js";
-import type { HoloCardOptions } from "./types.js";
+import type { CssVars, HoloCardOptions, HoloLayerOptions, ShowcaseOptions, VisualOptions } from "./types.js";
 
 const requestFrame = (cb: () => void): number =>
   typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame(cb) : setTimeout(cb, 16);
@@ -21,6 +21,86 @@ const SPRING_INTERACT = { stiffness: 0.066, damping: 0.25 };
 const SPRING_POPOVER = { stiffness: 0.033, damping: 0.45 };
 const SNAP_STIFFNESS = 0.01;
 const SNAP_DAMPING = 0.06;
+const DEFAULT_MAX_TILT = 50 / 3.5;
+const DEFAULT_PRECISION = 0.01;
+
+interface BaseDynamics {
+  stiffness: number;
+  damping: number;
+  precision?: number;
+  axes?: Record<string, SpringDynamics>;
+}
+
+interface MutableDynamics {
+  stiffness: number;
+  damping: number;
+  precision: number;
+  axes: Record<string, SpringDynamics> | undefined;
+}
+
+const mergeAxes = (
+  base: Record<string, SpringDynamics> | undefined,
+  override: Record<string, SpringDynamics> | undefined,
+): Record<string, SpringDynamics> | undefined => {
+  if (!base) {
+    return override;
+  }
+  if (!override) {
+    return base;
+  }
+  const out: Record<string, SpringDynamics> = { ...base };
+  for (const key of Object.keys(override)) {
+    out[key] = { ...base[key], ...override[key] };
+  }
+  return out;
+};
+
+const resolveDynamics = (base: BaseDynamics, override?: SpringOpts): BaseDynamics => {
+  const out: BaseDynamics = {
+    stiffness: override?.stiffness ?? base.stiffness,
+    damping: override?.damping ?? base.damping,
+  };
+  const precision = override?.precision ?? base.precision;
+  if (precision !== undefined) {
+    out.precision = precision;
+  }
+  const axes = mergeAxes(base.axes, override?.axes);
+  if (axes !== undefined) {
+    out.axes = axes;
+  }
+  return out;
+};
+
+const assignDynamics = (spring: MutableDynamics, dyn: BaseDynamics): void => {
+  spring.stiffness = dyn.stiffness;
+  spring.damping = dyn.damping;
+  spring.precision = dyn.precision ?? DEFAULT_PRECISION;
+  spring.axes = dyn.axes;
+};
+
+const cssDimension = (value: string | number, unit: string): string =>
+  typeof value === "number" ? `${value}${unit}` : value;
+
+interface ResolvedShowcase {
+  delay: number;
+  duration: number;
+  loop: boolean;
+  speed: number;
+  intensity: number;
+  dynamics: BaseDynamics;
+}
+
+const resolveShowcase = (showcase: boolean | ShowcaseOptions | undefined): ResolvedShowcase => {
+  const opts: ShowcaseOptions = typeof showcase === "object" ? showcase : {};
+  return {
+    delay: opts.delay ?? 2000,
+    duration: opts.duration ?? 4000,
+    loop: opts.loop ?? false,
+    speed: opts.speed ?? 0.05,
+    intensity: opts.intensity ?? 25,
+    dynamics: resolveDynamics({ stiffness: 0.02, damping: 0.5 }, opts.spring),
+  };
+};
 
 interface Vec2 {
   x: number;
@@ -36,16 +116,34 @@ export class HoloCard {
   readonly element: HTMLElement;
 
   private readonly rotator: HTMLElement;
+  private frontElement: HTMLElement | null;
+  private layersElement: HTMLElement | null = null;
   private readonly options: Required<
     Pick<HoloCardOptions, "interactive" | "activateOnClick" | "gyroscope" | "showcase">
   >;
 
-  private readonly springRotate = new Spring<Vec2>({ x: 0, y: 0 }, SPRING_INTERACT);
-  private readonly springGlare = new Spring<Glare>({ x: 50, y: 50, o: 0 }, SPRING_INTERACT);
-  private readonly springBackground = new Spring<Vec2>({ x: 50, y: 50 }, SPRING_INTERACT);
-  private readonly springRotateDelta = new Spring<Vec2>({ x: 0, y: 0 }, SPRING_POPOVER);
-  private readonly springTranslate = new Spring<Vec2>({ x: 0, y: 0 }, SPRING_POPOVER);
-  private readonly springScale = new Spring<number>(1, SPRING_POPOVER);
+  private readonly springRotate: Spring<Vec2>;
+  private readonly springGlare: Spring<Glare>;
+  private readonly springBackground: Spring<Vec2>;
+  private readonly springPointer: Spring<Vec2>;
+  private readonly springRotateDelta: Spring<Vec2>;
+  private readonly springTranslate: Spring<Vec2>;
+  private readonly springScale: Spring<number>;
+
+  private readonly liveRotate: BaseDynamics;
+  private readonly liveGlare: BaseDynamics;
+  private readonly liveBackground: BaseDynamics;
+  private readonly livePointer: BaseDynamics;
+  private readonly snapDynamics: BaseDynamics;
+
+  private readonly tiltFactorX: number;
+  private readonly tiltFactorY: number;
+  private readonly tiltScaleX: number;
+  private readonly tiltScaleY: number;
+  private readonly parallax: number;
+  private readonly glareRange: number;
+  private readonly returnDelay: number;
+  private readonly showcaseConfig: ResolvedShowcase;
 
   private isInteracting = false;
   private firstPop = true;
@@ -54,7 +152,7 @@ export class HoloCard {
 
   private renderScheduled = false;
   private interactRaf: number | null = null;
-  private pendingUpdate: { background: Vec2; rotate: Vec2; glare: Glare } | null = null;
+  private pendingUpdate: { background: Vec2; rotate: Vec2; glare: Glare; pointer: Vec2 } | null = null;
 
   private repositionTimer: ReturnType<typeof setTimeout> | null = null;
   private endTimer: ReturnType<typeof setTimeout> | null = null;
@@ -73,6 +171,8 @@ export class HoloCard {
       throw new Error("@kongyo2/cards-css: holo card element is missing its .holo-card__rotator child.");
     }
     this.rotator = rotator;
+    this.frontElement = element.querySelector<HTMLElement>(`.${CLASS.front}`);
+    this.layersElement = element.querySelector<HTMLElement>(`.${CLASS.layers}`);
 
     this.options = {
       interactive: options.interactive ?? true,
@@ -80,7 +180,37 @@ export class HoloCard {
       gyroscope: options.gyroscope ?? true,
       showcase: options.showcase ?? false,
     };
-    this.showcaseRunning = this.options.showcase;
+    this.showcaseRunning = Boolean(options.showcase);
+    this.showcaseConfig = resolveShowcase(options.showcase);
+
+    const physics = options.physics ?? {};
+    this.tiltFactorX = (physics.maxTiltX ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / 50;
+    this.tiltFactorY = (physics.maxTiltY ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / 50;
+    this.tiltScaleX = (physics.maxTiltX ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / DEFAULT_MAX_TILT;
+    this.tiltScaleY = (physics.maxTiltY ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / DEFAULT_MAX_TILT;
+    this.parallax = physics.parallax ?? 1;
+    this.glareRange = physics.glareRange ?? 1;
+    this.returnDelay = physics.returnDelay ?? 500;
+
+    const interactBase = resolveDynamics(SPRING_INTERACT, physics.interactSpring);
+    const popoverBase = resolveDynamics(SPRING_POPOVER, physics.popoverSpring);
+    this.snapDynamics = resolveDynamics({ stiffness: SNAP_STIFFNESS, damping: SNAP_DAMPING }, physics.snapSpring);
+
+    this.liveRotate = resolveDynamics(interactBase, physics.springs?.rotate);
+    this.liveGlare = resolveDynamics(interactBase, physics.springs?.glare);
+    this.liveBackground = resolveDynamics(interactBase, physics.springs?.background);
+    this.livePointer = interactBase;
+
+    this.springRotate = new Spring<Vec2>({ x: 0, y: 0 }, this.liveRotate);
+    this.springGlare = new Spring<Glare>({ x: 50, y: 50, o: 0 }, this.liveGlare);
+    this.springBackground = new Spring<Vec2>({ x: 50, y: 50 }, this.liveBackground);
+    this.springPointer = new Spring<Vec2>({ x: 50, y: 50 }, this.livePointer);
+    this.springRotateDelta = new Spring<Vec2>(
+      { x: 0, y: 0 },
+      resolveDynamics(popoverBase, physics.springs?.rotateDelta),
+    );
+    this.springTranslate = new Spring<Vec2>({ x: 0, y: 0 }, resolveDynamics(popoverBase, physics.springs?.translate));
+    this.springScale = new Spring<number>(1, resolveDynamics(popoverBase, physics.springs?.scale));
 
     if (options.effect) {
       element.dataset.effect = options.effect;
@@ -93,12 +223,34 @@ export class HoloCard {
     if (typeof options.aspectRatio === "number") {
       element.style.setProperty("--card-aspect", String(options.aspectRatio));
     }
-    if (options.mask) {
-      element.style.setProperty("--mask", `url(${options.mask})`);
+
+    const mask = normalizeMask(options.mask);
+    if (mask?.image) {
+      element.style.setProperty("--mask", `url(${mask.image})`);
+      if (mask.size) {
+        element.style.setProperty("--mask-size", mask.size);
+      }
+      if (mask.position) {
+        element.style.setProperty("--mask-position", mask.position);
+      }
+      if (mask.repeat) {
+        element.style.setProperty("--mask-repeat", mask.repeat);
+      }
       element.classList.add(CLASS.masked);
+      if (mask.mode === "card") {
+        element.classList.add(CLASS.maskCard);
+      }
     }
     if (options.foil) {
       element.style.setProperty("--foil", `url(${options.foil})`);
+    }
+    this.applyVisual(options.visual);
+    applyVars(element, options.vars);
+
+    if (!this.layersElement && options.layers?.length && this.frontElement) {
+      for (const layer of options.layers) {
+        this.addLayer(layer);
+      }
     }
 
     this.applyStaticStyles(options.textureSeed);
@@ -107,6 +259,7 @@ export class HoloCard {
       this.springRotate,
       this.springGlare,
       this.springBackground,
+      this.springPointer,
       this.springRotateDelta,
       this.springTranslate,
       this.springScale,
@@ -130,6 +283,35 @@ export class HoloCard {
 
     if (this.options.showcase) {
       this.startShowcase();
+    }
+  }
+
+  private applyVisual(visual: VisualOptions | undefined): void {
+    if (!visual) {
+      return;
+    }
+    const style = this.element.style;
+    const setNumber = (property: string, value: number | undefined): void => {
+      if (typeof value === "number") {
+        style.setProperty(property, String(value));
+      }
+    };
+    setNumber("--hc-brightness", visual.brightness);
+    setNumber("--hc-contrast", visual.contrast);
+    setNumber("--hc-saturate", visual.saturate);
+    setNumber("--hc-glare-opacity", visual.glareOpacity);
+    setNumber("--hc-shine-opacity", visual.shineOpacity);
+    if (visual.lineSpace !== undefined) {
+      style.setProperty("--space", cssDimension(visual.lineSpace, "%"));
+    }
+    if (visual.lineAngle !== undefined) {
+      style.setProperty("--angle", cssDimension(visual.lineAngle, "deg"));
+    }
+    if (visual.glitterSize !== undefined) {
+      style.setProperty("--glittersize", cssDimension(visual.glitterSize, "%"));
+    }
+    if (visual.imageFit !== undefined) {
+      style.setProperty("--imgsize", visual.imageFit);
     }
   }
 
@@ -162,12 +344,25 @@ export class HoloCard {
 
     if (this.options.activateOnClick) {
       const onClick = (): void => this.toggleActive();
-      const onBlur = (): void => this.deactivate();
+      const onFocusOut = (event: FocusEvent): void => {
+        const next = event.relatedTarget;
+        if (next instanceof Node && this.element.contains(next)) {
+          return;
+        }
+        this.deactivate();
+      };
       this.rotator.addEventListener("click", onClick);
-      this.rotator.addEventListener("blur", onBlur);
+      this.rotator.addEventListener("focusout", onFocusOut);
       this.rotator.tabIndex = this.rotator.tabIndex >= 0 ? this.rotator.tabIndex : 0;
       this.cleanups.push(() => this.rotator.removeEventListener("click", onClick));
-      this.cleanups.push(() => this.rotator.removeEventListener("blur", onBlur));
+      this.cleanups.push(() => this.rotator.removeEventListener("focusout", onFocusOut));
+
+      const interactiveOverlay = this.element.querySelector<HTMLElement>(`.${CLASS.overlayInteractive}`);
+      if (interactiveOverlay) {
+        const stopClick = (event: Event): void => event.stopPropagation();
+        interactiveOverlay.addEventListener("click", stopClick);
+        this.cleanups.push(() => interactiveOverlay.removeEventListener("click", stopClick));
+      }
 
       const onScroll = (): void => this.reposition();
       window.addEventListener("scroll", onScroll, { passive: true });
@@ -175,6 +370,14 @@ export class HoloCard {
       this.cleanups.push(() => window.removeEventListener("scroll", onScroll));
       this.cleanups.push(() => window.removeEventListener("resize", onScroll));
     }
+  }
+
+  private parallaxBackground(x: number, y: number): Vec2 {
+    return { x: round(50 + (x - 50) * this.parallax), y: round(50 + (y - 50) * this.parallax) };
+  }
+
+  private rangeGlare(x: number, y: number, o: number): Glare {
+    return { x: round(50 + (x - 50) * this.glareRange), y: round(50 + (y - 50) * this.glareRange), o };
   }
 
   private interact(event: PointerEvent): void {
@@ -206,15 +409,17 @@ export class HoloCard {
     const center = { x: percent.x - 50, y: percent.y - 50 };
 
     this.pendingUpdate = {
-      background: { x: adjust(percent.x, 0, 100, 37, 63), y: adjust(percent.y, 0, 100, 33, 67) },
-      rotate: { x: round(-(center.x / 3.5)), y: round(center.y / 3.5) },
-      glare: { x: round(percent.x), y: round(percent.y), o: 1 },
+      background: this.parallaxBackground(adjust(percent.x, 0, 100, 37, 63), adjust(percent.y, 0, 100, 33, 67)),
+      rotate: { x: round(-(center.x * this.tiltFactorX)), y: round(center.y * this.tiltFactorY) },
+      glare: this.rangeGlare(round(percent.x), round(percent.y), 1),
+      pointer: { x: round(percent.x), y: round(percent.y) },
     };
 
     if (this.interactRaf === null) {
       this.interactRaf = requestFrame(() => {
         if (this.pendingUpdate) {
-          this.updateSprings(this.pendingUpdate.background, this.pendingUpdate.rotate, this.pendingUpdate.glare);
+          const update = this.pendingUpdate;
+          this.updateSprings(update.background, update.rotate, update.glare, update.pointer);
           this.pendingUpdate = null;
         }
         this.interactRaf = null;
@@ -222,7 +427,7 @@ export class HoloCard {
     }
   }
 
-  private interactEnd(delay = 500): void {
+  private interactEnd(delay = this.returnDelay): void {
     if (this.interactRaf !== null) {
       cancelFrame(this.interactRaf);
       this.interactRaf = null;
@@ -234,18 +439,26 @@ export class HoloCard {
     }
     this.endTimer = setTimeout(() => {
       this.setInteracting(false);
-      this.setSpringDynamics(SNAP_STIFFNESS, SNAP_DAMPING);
+      this.setGroupDynamics(this.snapDynamics);
       void this.springRotate.set({ x: 0, y: 0 }, { soft: 1 });
       void this.springGlare.set({ x: 50, y: 50, o: 0 }, { soft: 1 });
       void this.springBackground.set({ x: 50, y: 50 }, { soft: 1 });
+      void this.springPointer.set({ x: 50, y: 50 }, { soft: 1 });
     }, delay);
   }
 
-  private setSpringDynamics(stiffness: number, damping: number): void {
-    for (const spring of [this.springRotate, this.springGlare, this.springBackground]) {
-      spring.stiffness = stiffness;
-      spring.damping = damping;
-    }
+  private setGroupDynamics(dyn: BaseDynamics): void {
+    assignDynamics(this.springRotate, dyn);
+    assignDynamics(this.springGlare, dyn);
+    assignDynamics(this.springBackground, dyn);
+    assignDynamics(this.springPointer, dyn);
+  }
+
+  private applyLiveDynamics(): void {
+    assignDynamics(this.springRotate, this.liveRotate);
+    assignDynamics(this.springGlare, this.liveGlare);
+    assignDynamics(this.springBackground, this.liveBackground);
+    assignDynamics(this.springPointer, this.livePointer);
   }
 
   private settle(opts: SpringSetOpts): void {
@@ -254,11 +467,12 @@ export class HoloCard {
     void this.springRotateDelta.set({ x: 0, y: 0 }, opts);
   }
 
-  private updateSprings(background: Vec2, rotate: Vec2, glare: Glare): void {
-    this.setSpringDynamics(SPRING_INTERACT.stiffness, SPRING_INTERACT.damping);
+  private updateSprings(background: Vec2, rotate: Vec2, glare: Glare, pointer: Vec2): void {
+    this.applyLiveDynamics();
     void this.springBackground.set(background);
     void this.springRotate.set(rotate);
     void this.springGlare.set(glare);
+    void this.springPointer.set(pointer);
   }
 
   private setInteracting(value: boolean): void {
@@ -286,6 +500,7 @@ export class HoloCard {
     const rotate = this.springRotate.current;
     const rotateDelta = this.springRotateDelta.current;
     const background = this.springBackground.current;
+    const pointer = this.springPointer.current;
     const translate = this.springTranslate.current;
     const scale = this.springScale.current;
 
@@ -297,9 +512,13 @@ export class HoloCard {
     style.setProperty("--pointer-from-center", String(fromCenter));
     style.setProperty("--pointer-from-top", String(glare.y / 100));
     style.setProperty("--pointer-from-left", String(glare.x / 100));
+    style.setProperty("--pointer-dx", String(round((pointer.x - 50) / 50)));
+    style.setProperty("--pointer-dy", String(round((pointer.y - 50) / 50)));
     style.setProperty("--card-opacity", String(glare.o));
     style.setProperty("--rotate-x", `${rotate.x + rotateDelta.x}deg`);
     style.setProperty("--rotate-y", `${rotate.y + rotateDelta.y}deg`);
+    style.setProperty("--tilt-x", String(round(rotate.x + rotateDelta.x)));
+    style.setProperty("--tilt-y", String(round(rotate.y + rotateDelta.y)));
     style.setProperty("--background-x", `${background.x}%`);
     style.setProperty("--background-y", `${background.y}%`);
     style.setProperty("--card-scale", String(scale));
@@ -311,12 +530,14 @@ export class HoloCard {
     if (getActiveCard() === this) {
       this.popover();
       this.element.classList.add(CLASS.active);
+      this.element.style.setProperty("--card-active", "1");
       if (this.options.gyroscope) {
         this.startGyroscope();
       }
     } else {
       this.retreat();
       this.element.classList.remove(CLASS.active);
+      this.element.style.setProperty("--card-active", "0");
       this.stopGyroscope();
     }
   }
@@ -391,11 +612,17 @@ export class HoloCard {
       x: clamp(orientation.relative.gamma, -limit.x, limit.x),
       y: clamp(orientation.relative.beta, -limit.y, limit.y),
     };
+    const gx = adjust(degrees.x, -limit.x, limit.x, 0, 100);
+    const gy = adjust(degrees.y, -limit.y, limit.y, 0, 100);
     this.setInteracting(true);
     this.updateSprings(
-      { x: adjust(degrees.x, -limit.x, limit.x, 37, 63), y: adjust(degrees.y, -limit.y, limit.y, 33, 67) },
-      { x: round(degrees.x * -1), y: round(degrees.y) },
-      { x: adjust(degrees.x, -limit.x, limit.x, 0, 100), y: adjust(degrees.y, -limit.y, limit.y, 0, 100), o: 1 },
+      this.parallaxBackground(
+        adjust(degrees.x, -limit.x, limit.x, 37, 63),
+        adjust(degrees.y, -limit.y, limit.y, 33, 67),
+      ),
+      { x: round(degrees.x * -1 * this.tiltScaleX), y: round(degrees.y * this.tiltScaleY) },
+      this.rangeGlare(gx, gy, 1),
+      { x: gx, y: gy },
     );
   }
 
@@ -409,30 +636,44 @@ export class HoloCard {
     if (!this.isVisible) {
       return;
     }
-    const s = 0.02;
-    const d = 0.5;
+    const config = this.showcaseConfig;
+    const amp = config.intensity;
     let r = 0;
     this.showcaseStart = setTimeout(() => {
+      if (this.endTimer) {
+        clearTimeout(this.endTimer);
+        this.endTimer = null;
+      }
       this.setInteracting(true);
-      this.setSpringDynamics(s, d);
+      this.setGroupDynamics(config.dynamics);
       if (!this.isVisible) {
         this.setInteracting(false);
         return;
       }
       this.showcaseInterval = setInterval(() => {
-        r += 0.05;
-        void this.springRotate.set({ x: Math.sin(r) * 25, y: Math.cos(r) * 25 });
-        void this.springGlare.set({ x: 55 + Math.sin(r) * 55, y: 55 + Math.cos(r) * 55, o: 0.8 });
-        void this.springBackground.set({ x: 20 + Math.sin(r) * 20, y: 20 + Math.cos(r) * 20 });
+        r += config.speed;
+        void this.springRotate.set({ x: Math.sin(r) * amp, y: Math.cos(r) * amp });
+        void this.springGlare.set({
+          x: 50 + Math.sin(r) * amp * 2.2,
+          y: 50 + Math.cos(r) * amp * 2.2,
+          o: 0.8,
+        });
+        void this.springBackground.set({
+          x: 50 + Math.sin(r) * amp * 0.8,
+          y: 50 + Math.cos(r) * amp * 0.8,
+        });
+        void this.springPointer.set({ x: 50 + Math.sin(r) * amp * 1.6, y: 50 + Math.cos(r) * amp * 1.6 });
       }, 20);
-      this.showcaseEnd = setTimeout(() => {
-        if (this.showcaseInterval) {
-          clearInterval(this.showcaseInterval);
-          this.showcaseInterval = null;
-        }
-        this.interactEnd(0);
-      }, 4000);
-    }, 2000);
+      if (!config.loop) {
+        this.showcaseEnd = setTimeout(() => {
+          if (this.showcaseInterval) {
+            clearInterval(this.showcaseInterval);
+            this.showcaseInterval = null;
+          }
+          this.interactEnd(0);
+        }, config.duration);
+      }
+    }, config.delay);
   }
 
   private endShowcase(): void {
@@ -483,6 +724,43 @@ export class HoloCard {
     this.element.dataset.effect = effect ?? "none";
   }
 
+  /** The `.holo-card__front` element, for appending custom content at runtime. */
+  get front(): HTMLElement | null {
+    return this.frontElement;
+  }
+
+  /** Apply CSS custom properties to the root element (for content linkage). */
+  setVars(vars: CssVars): void {
+    applyVars(this.element, vars);
+  }
+
+  /** Update fine-grained visual controls at runtime. */
+  setVisual(visual: VisualOptions): void {
+    this.applyVisual(visual);
+  }
+
+  /**
+   * Insert an extra layer between the artwork and the foil at runtime, returning
+   * the created element. Requires the card to have a `.holo-card__front`.
+   */
+  addLayer(layer: HoloLayerOptions): HTMLElement {
+    const front = this.frontElement;
+    if (!front) {
+      throw new Error("@kongyo2/cards-css: cannot add a layer — the card has no .holo-card__front element.");
+    }
+    const doc = front.ownerDocument;
+    const element = buildLayerElement(doc, layer);
+    if (!this.layersElement) {
+      const container = doc.createElement("div");
+      container.className = CLASS.layers;
+      const shine = front.querySelector(`.${CLASS.shine}`);
+      front.insertBefore(container, shine);
+      this.layersElement = container;
+    }
+    this.layersElement.appendChild(element);
+    return element;
+  }
+
   get active(): boolean {
     return getActiveCard() === this;
   }
@@ -514,6 +792,7 @@ export class HoloCard {
       this.springRotate,
       this.springGlare,
       this.springBackground,
+      this.springPointer,
       this.springRotateDelta,
       this.springTranslate,
       this.springScale,

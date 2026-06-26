@@ -3,7 +3,7 @@ import { buildHoloCardElement } from "./dom.js";
 import type { CreateHoloCardOptions, HoloCardOptions } from "./types.js";
 
 export { HoloCard } from "./holo-card.js";
-export { buildHoloCardElement, CLASS } from "./dom.js";
+export { buildHoloCardElement, buildLayerElement, applyVars, normalizeMask, CLASS, type ResolvedMask } from "./dom.js";
 export {
   generateTextures,
   texturesToCssVariables,
@@ -22,9 +22,21 @@ export {
   type RelativeOrientation,
 } from "./orientation.js";
 export { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
-export { Spring, type SpringValue, type SpringOpts, type SpringSetOpts } from "./spring.js";
+export { Spring, type SpringValue, type SpringOpts, type SpringSetOpts, type SpringDynamics } from "./spring.js";
 export { round, clamp, adjust } from "./math.js";
-export type { HoloEffect, HoloCardOptions, CreateHoloCardOptions } from "./types.js";
+export type {
+  HoloEffect,
+  HoloCardOptions,
+  CreateHoloCardOptions,
+  HoloContent,
+  CssVars,
+  SpringTuning,
+  PhysicsOptions,
+  ShowcaseOptions,
+  VisualOptions,
+  MaskOptions,
+  HoloLayerOptions,
+} from "./types.js";
 
 export const createHoloCard = (options: CreateHoloCardOptions): HoloCard => {
   const element = buildHoloCardElement(options);

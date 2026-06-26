@@ -1,10 +1,13 @@
-.holo-card[data-effect="cosmos"] .holo-card__shine {
+.holo-card[data-effect="cosmos"] {
   --space: 4%;
+  --angle: 82deg;
+}
 
+.holo-card[data-effect="cosmos"] .holo-card__shine {
   background-image:
     var(--hc-cosmos-bottom),
     repeating-linear-gradient(
-      82deg,
+      var(--angle),
       hsl(53, 65%, 60%) calc(var(--space) * 1),
       hsl(93, 56%, 50%) calc(var(--space) * 2),
       hsl(176, 54%, 49%) calc(var(--space) * 3),
@@ -37,7 +40,7 @@
     400% 900%,
     cover;
 
-  filter: brightness(1) contrast(1) saturate(0.8);
+  filter: brightness(var(--hc-brightness)) contrast(var(--hc-contrast)) saturate(calc(0.8 * var(--hc-saturate)));
   mix-blend-mode: color-dodge;
 }
 
@@ -48,7 +51,7 @@
   background-image:
     var(--hc-cosmos-middle),
     repeating-linear-gradient(
-      82deg,
+      var(--angle),
       hsl(53, 65%, 60%) calc(var(--space) * 1),
       hsl(93, 56%, 50%) calc(var(--space) * 2),
       hsl(176, 54%, 49%) calc(var(--space) * 3),
@@ -86,7 +89,7 @@
   background-image:
     var(--hc-cosmos-top),
     repeating-linear-gradient(
-      82deg,
+      var(--angle),
       hsl(53, 65%, 60%) calc(var(--space) * 1),
       hsl(93, 56%, 50%) calc(var(--space) * 2),
       hsl(176, 54%, 49%) calc(var(--space) * 3),
@@ -125,7 +128,7 @@
   );
   filter: brightness(0.75) contrast(2) saturate(2);
   mix-blend-mode: overlay;
-  opacity: calc(var(--card-opacity) * (0.25 + var(--pointer-from-center)));
+  opacity: calc(var(--card-opacity) * (0.25 + var(--pointer-from-center)) * var(--hc-glare-opacity));
 }
 
 .holo-card[data-effect="cosmos"] .holo-card__glare::after {
