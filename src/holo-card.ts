@@ -654,13 +654,13 @@ export class HoloCard {
         r += config.speed;
         void this.springRotate.set({ x: Math.sin(r) * amp, y: Math.cos(r) * amp });
         void this.springGlare.set({
-          x: 55 + Math.sin(r) * amp * 2.2,
-          y: 55 + Math.cos(r) * amp * 2.2,
+          x: 50 + Math.sin(r) * amp * 2.2,
+          y: 50 + Math.cos(r) * amp * 2.2,
           o: 0.8,
         });
         void this.springBackground.set({
-          x: 20 + Math.sin(r) * amp * 0.8,
-          y: 20 + Math.cos(r) * amp * 0.8,
+          x: 50 + Math.sin(r) * amp * 0.8,
+          y: 50 + Math.cos(r) * amp * 0.8,
         });
         void this.springPointer.set({ x: 50 + Math.sin(r) * amp * 1.6, y: 50 + Math.cos(r) * amp * 1.6 });
       }, 20);
