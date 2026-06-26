@@ -77,9 +77,9 @@ export interface VisualOptions {
   glareOpacity?: number;
   /** Shine/foil layer opacity multiplier. */
   shineOpacity?: number;
-  /** Foil line spacing (`--space`); a number is read as a percentage. */
+  /** Foil line spacing for the glitter/cosmos foils (`--space`); a number is read as a percentage. */
   lineSpace?: string | number;
-  /** Foil sweep angle (`--angle`); a number is read as degrees. */
+  /** Foil sweep angle for the glitter/cosmos foils (`--angle`); a number is read as degrees. */
   lineAngle?: string | number;
   /** Glitter cell size (`--glittersize`); a number is read as a percentage. */
   glitterSize?: string | number;
@@ -150,17 +150,21 @@ export interface HoloCardOptions {
   vars?: CssVars;
 }
 
-export interface CreateHoloCardOptions extends HoloCardOptions {
-  /** Front artwork source. Optional when `content` is supplied. */
-  image?: string;
+export interface CreateHoloCardFields extends HoloCardOptions {
   imageAlt?: string;
   back?: string;
   backAlt?: string;
-  /** Front content, used instead of (or alongside) `image` for richer cards. */
-  content?: HoloContent;
   /** Foreground content above the foil — name plates, badges, live data, etc. */
   overlay?: HoloContent;
   /** Let the overlay receive pointer events (default false: purely decorative). */
   overlayInteractive?: boolean;
   className?: string;
 }
+
+/**
+ * Options for `createHoloCard`. Either `image` (front artwork) or `content`
+ * (custom front content) must be supplied — both may be combined — so the card
+ * is never built blank.
+ */
+export type CreateHoloCardOptions = CreateHoloCardFields &
+  ({ image: string; content?: HoloContent } | { image?: string; content: HoloContent });

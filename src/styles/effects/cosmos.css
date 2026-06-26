@@ -1,12 +1,13 @@
 .holo-card[data-effect="cosmos"] {
   --space: 4%;
+  --angle: 82deg;
 }
 
 .holo-card[data-effect="cosmos"] .holo-card__shine {
   background-image:
     var(--hc-cosmos-bottom),
     repeating-linear-gradient(
-      82deg,
+      var(--angle),
       hsl(53, 65%, 60%) calc(var(--space) * 1),
       hsl(93, 56%, 50%) calc(var(--space) * 2),
       hsl(176, 54%, 49%) calc(var(--space) * 3),
@@ -50,7 +51,7 @@
   background-image:
     var(--hc-cosmos-middle),
     repeating-linear-gradient(
-      82deg,
+      var(--angle),
       hsl(53, 65%, 60%) calc(var(--space) * 1),
       hsl(93, 56%, 50%) calc(var(--space) * 2),
       hsl(176, 54%, 49%) calc(var(--space) * 3),
@@ -88,7 +89,7 @@
   background-image:
     var(--hc-cosmos-top),
     repeating-linear-gradient(
-      82deg,
+      var(--angle),
       hsl(53, 65%, 60%) calc(var(--space) * 1),
       hsl(93, 56%, 50%) calc(var(--space) * 2),
       hsl(176, 54%, 49%) calc(var(--space) * 3),
