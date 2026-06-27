@@ -39,6 +39,10 @@ export const applyVars = (element: HTMLElement, vars: CssVars | undefined): void
   }
 };
 
+const CSS_STRING_UNSAFE = /[\\"\n\r\f]/g;
+
+export const cssUrl = (value: string): string => `url("${value.replace(CSS_STRING_UNSAFE, (char) => `\\${char}`)}")`;
+
 export interface ResolvedMask {
   image: string | undefined;
   size: string | undefined;
@@ -91,11 +95,11 @@ export const buildLayerElement = (doc: Document, layer: HoloLayerOptions): HTMLE
     el.style.setProperty("--layer-parallax", String(layer.parallax));
   }
   if (layer.mask) {
-    el.style.setProperty("--layer-mask", `url(${layer.mask})`);
+    el.style.setProperty("--layer-mask", cssUrl(layer.mask));
     el.classList.add(`${CLASS.layer}--masked`);
   }
   if (layer.image) {
-    el.style.setProperty("--layer-image", `url(${layer.image})`);
+    el.style.setProperty("--layer-image", cssUrl(layer.image));
     el.style.setProperty("--layer-size", layer.size ?? "cover");
     el.style.setProperty("--layer-position", layer.position ?? "center");
   }
