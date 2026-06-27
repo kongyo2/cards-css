@@ -1,6 +1,6 @@
 import { adjust, clamp, round } from "./math.js";
 import { Spring, type SpringSetOpts, type SpringOpts, type SpringDynamics } from "./spring.js";
-import { CLASS, applyVars, buildLayerElement, normalizeMask } from "./dom.js";
+import { CLASS, applyVars, buildLayerElement, cssUrl, normalizeMask } from "./dom.js";
 import { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 import { resetBaseOrientation, subscribeOrientation, type RelativeOrientation } from "./orientation.js";
 import { generateTextures, texturesToCssVariables } from "./textures.js";
@@ -226,7 +226,7 @@ export class HoloCard {
 
     const mask = normalizeMask(options.mask);
     if (mask?.image) {
-      element.style.setProperty("--mask", `url(${mask.image})`);
+      element.style.setProperty("--mask", cssUrl(mask.image));
       if (mask.size) {
         element.style.setProperty("--mask-size", mask.size);
       }
@@ -242,7 +242,7 @@ export class HoloCard {
       }
     }
     if (options.foil) {
-      element.style.setProperty("--foil", `url(${options.foil})`);
+      element.style.setProperty("--foil", cssUrl(options.foil));
     }
     this.applyVisual(options.visual);
     applyVars(element, options.vars);
