@@ -414,6 +414,9 @@ export class HoloCard {
       return;
     }
     const style = this.element.style;
+    style.removeProperty("--glare-image");
+    style.removeProperty("--glare-blend");
+    this.element.classList.remove(CLASS.customGlare);
     if (typeof glare.opacity === "number") {
       style.setProperty("--hc-glare-opacity", String(glare.opacity));
     }
@@ -881,7 +884,12 @@ export class HoloCard {
     this.applyPalette(palette);
   }
 
-  /** Update the dynamic glare (reflected light) at runtime. */
+  /**
+   * Update the dynamic glare (reflected light) at runtime. The image / shape /
+   * blend are replaced wholesale — omit them to return to the effect's built-in
+   * glare. `opacity` is shared with `visual.glareOpacity` and only changes when
+   * provided.
+   */
   setGlare(glare: GlareOptions): void {
     this.applyGlare(glare);
   }
