@@ -4,7 +4,7 @@ import { CLASS, applyVars, buildLayerElement, cssUrl, normalizeMask } from "./do
 import { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 import { resetBaseOrientation, subscribeOrientation, type RelativeOrientation } from "./orientation.js";
 import { generateTextures, texturesToCssVariables } from "./textures.js";
-import { paletteToCssVariables } from "./palette.js";
+import { paletteToCssVariables, PALETTE_VARIABLES } from "./palette.js";
 import type {
   CssVars,
   DepthOptions,
@@ -122,13 +122,16 @@ interface ResolvedGyroscope {
   invertY: boolean;
 }
 
+const DEFAULT_GYRO_RANGE_X = 16;
+const DEFAULT_GYRO_RANGE_Y = 18;
+
 const resolveGyroscope = (gyroscope: boolean | GyroscopeOptions | undefined): ResolvedGyroscope => {
   const opts: GyroscopeOptions = gyroscope && typeof gyroscope === "object" ? gyroscope : {};
   const enabled = typeof gyroscope === "boolean" ? gyroscope : (opts.enabled ?? true);
   return {
     enabled,
-    rangeX: opts.rangeX ?? 16,
-    rangeY: opts.rangeY ?? 18,
+    rangeX: opts.rangeX ?? DEFAULT_GYRO_RANGE_X,
+    rangeY: opts.rangeY ?? DEFAULT_GYRO_RANGE_Y,
     sensitivity: opts.sensitivity ?? 1,
     invertX: opts.invertX ?? false,
     invertY: opts.invertY ?? false,
@@ -168,7 +171,8 @@ const composeGlareImage = (glare: GlareOptions): string | undefined => {
   ) {
     return undefined;
   }
-  const shape = glare.shape ?? "circle";
+  const sizeTokens = glare.size ? glare.size.trim().split(/\s+/) : [];
+  const shape = glare.shape ?? (sizeTokens.length > 1 ? "ellipse" : "circle");
   const geometry = glare.size ? `${shape} ${glare.size}` : `${glare.extent ?? "farthest-corner"} ${shape}`;
   const stops = (glare.stops?.length ? glare.stops : DEFAULT_GLARE_STOPS).join(", ");
   return `radial-gradient(${geometry} at var(--pointer-x) var(--pointer-y), ${stops})`;
@@ -396,7 +400,11 @@ export class HoloCard {
       return;
     }
     const style = this.element.style;
-    for (const [name, value] of Object.entries(paletteToCssVariables(palette))) {
+    const vars = paletteToCssVariables(palette);
+    for (const name of PALETTE_VARIABLES) {
+      style.removeProperty(name);
+    }
+    for (const [name, value] of Object.entries(vars)) {
       style.setProperty(name, value);
     }
   }
@@ -735,15 +743,17 @@ export class HoloCard {
       x: clamp(orientation.relative.gamma * gyro.sensitivity * dirX, -limit.x, limit.x),
       y: clamp(orientation.relative.beta * gyro.sensitivity * dirY, -limit.y, limit.y),
     };
-    const gx = adjust(degrees.x, -limit.x, limit.x, 0, 100);
-    const gy = adjust(degrees.y, -limit.y, limit.y, 0, 100);
+    const fracX = limit.x === 0 ? 0 : degrees.x / limit.x;
+    const fracY = limit.y === 0 ? 0 : degrees.y / limit.y;
+    const gx = adjust(fracX, -1, 1, 0, 100);
+    const gy = adjust(fracY, -1, 1, 0, 100);
     this.setInteracting(true);
     this.updateSprings(
-      this.parallaxBackground(
-        adjust(degrees.x, -limit.x, limit.x, 37, 63),
-        adjust(degrees.y, -limit.y, limit.y, 33, 67),
-      ),
-      { x: round(degrees.x * -1 * this.tiltScaleX), y: round(degrees.y * this.tiltScaleY) },
+      this.parallaxBackground(adjust(fracX, -1, 1, 37, 63), adjust(fracY, -1, 1, 33, 67)),
+      {
+        x: round(fracX * DEFAULT_GYRO_RANGE_X * -1 * this.tiltScaleX),
+        y: round(fracY * DEFAULT_GYRO_RANGE_Y * this.tiltScaleY),
+      },
       this.rangeGlare(gx, gy, 1),
       { x: gx, y: gy },
     );
@@ -862,7 +872,10 @@ export class HoloCard {
     this.applyVisual(visual);
   }
 
-  /** Swap the foil colour palette / theme at runtime. */
+  /**
+   * Swap the foil colour palette / theme at runtime. This is a full replacement:
+   * any palette variable not present in `palette` reverts to its default.
+   */
   setPalette(palette: PaletteOptions): void {
     this.applyPalette(palette);
   }
@@ -880,12 +893,14 @@ export class HoloCard {
   /** Update the gyroscope physical-behaviour tuning at runtime. */
   setGyroscope(gyroscope: boolean | GyroscopeOptions): void {
     this.gyroConfig = resolveGyroscope(gyroscope);
-    if (getActiveCard() === this) {
-      if (this.gyroConfig.enabled) {
-        this.startGyroscope();
-      } else {
-        this.stopGyroscope();
-      }
+    if (getActiveCard() !== this) {
+      return;
+    }
+    if (this.gyroConfig.enabled) {
+      this.startGyroscope();
+    } else {
+      this.stopGyroscope();
+      this.interactEnd(0);
     }
   }
 

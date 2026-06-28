@@ -138,6 +138,26 @@ export const resolvePalette = (palette: PaletteOptions): PaletteOptions => {
 
 const SPECTRUM_VARS = ["--red", "--yellow", "--green", "--blue", "--violet"] as const;
 
+/** Every CSS custom property the palette can own — used to clear stale values when swapping palettes. */
+export const PALETTE_VARIABLES: string[] = [
+  "--sunpillar-1",
+  "--sunpillar-2",
+  "--sunpillar-3",
+  "--sunpillar-4",
+  "--sunpillar-5",
+  "--sunpillar-6",
+  ...SPECTRUM_VARS,
+  "--cosmos-clr-1",
+  "--cosmos-clr-2",
+  "--cosmos-clr-3",
+  "--cosmos-clr-4",
+  "--cosmos-clr-5",
+  "--cosmos-clr-6",
+  "--card-edge",
+  "--card-back",
+  "--card-glow",
+];
+
 const cycleInto = (vars: Record<string, string>, prefix: string, count: number, colors: string[]): void => {
   if (colors.length === 0) {
     return;

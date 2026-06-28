@@ -107,7 +107,7 @@ export interface GlareOptions {
   shape?: "circle" | "ellipse";
   /** Radial-gradient extent keyword, e.g. `farthest-corner` / `closest-side` (default `farthest-corner`). */
   extent?: string;
-  /** Explicit gradient size, e.g. `60%` or `60% 40%`; overrides `extent` when set. */
+  /** Explicit gradient size — two values imply an ellipse (e.g. `60% 40%`), a single value a circle radius (e.g. `120px`); overrides `extent` when set. */
   size?: string;
   /** Colour stops, e.g. `["hsla(0,0%,100%,.8) 10%", "hsla(0,0%,0%,.5) 90%"]`. */
   stops?: string[];
