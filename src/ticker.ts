@@ -5,13 +5,9 @@ const raf: (cb: (time: number) => void) => void =
     ? (cb) => requestAnimationFrame(cb)
     : (cb) => setTimeout(() => cb(now()), 1000 / 60);
 
-interface Task {
-  c: (time: number) => boolean;
-  f: () => void;
-}
+type Task = (time: number) => boolean;
 
 export interface TaskHandle {
-  promise: Promise<void>;
   abort: () => void;
 }
 
@@ -19,9 +15,8 @@ const tasks = new Set<Task>();
 
 const runTasks = (time: number): void => {
   tasks.forEach((task) => {
-    if (!task.c(time)) {
+    if (!task(time)) {
       tasks.delete(task);
-      task.f();
     }
   });
   if (tasks.size !== 0) {
@@ -29,18 +24,14 @@ const runTasks = (time: number): void => {
   }
 };
 
-export const loop = (callback: (time: number) => boolean): TaskHandle => {
-  let task: Task;
+export const loop = (callback: Task): TaskHandle => {
   if (tasks.size === 0) {
     raf(runTasks);
   }
+  tasks.add(callback);
   return {
-    promise: new Promise<void>((fulfil) => {
-      task = { c: callback, f: fulfil };
-      tasks.add(task);
-    }),
     abort: () => {
-      tasks.delete(task);
+      tasks.delete(callback);
     },
   };
 };
