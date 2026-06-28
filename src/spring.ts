@@ -39,6 +39,10 @@ interface AxisDynamics {
   precision: number;
 }
 
+const MAX_FRAME_DELTA = 2;
+
+const clampFrameDelta = (dt: number): number => Math.max(0, Math.min(dt, MAX_FRAME_DELTA));
+
 const tickScalar = (
   ctx: FrameContext,
   axis: AxisDynamics,
@@ -100,7 +104,7 @@ export class Spring<T extends SpringValue> {
   private cancelTask = false;
   private task: TaskHandle | null = null;
   private lastTime = 0;
-  private currentToken: object | null = null;
+  private resolvers: Array<() => void> = [];
   private readonly subscribers = new Subscribers<T>(() => this.value);
 
   constructor(value: T, opts: SpringOpts = {}) {
@@ -127,7 +131,7 @@ export class Spring<T extends SpringValue> {
 
   set(newValue: T, opts: SpringSetOpts = {}): Promise<void> {
     this.targetValue = newValue;
-    const token = (this.currentToken = {});
+    this.resolvePending();
 
     if (opts.hard || (this.stiffness >= 1 && this.damping >= 1)) {
       this.cancelTask = true;
@@ -148,11 +152,10 @@ export class Spring<T extends SpringValue> {
       this.invMass = 0;
     }
 
-    let handle = this.task;
-    if (!handle) {
+    if (!this.task) {
       this.lastTime = now();
       this.cancelTask = false;
-      handle = loop((time) => {
+      this.task = loop((time) => {
         if (this.cancelTask) {
           this.cancelTask = false;
           this.task = null;
@@ -166,7 +169,7 @@ export class Spring<T extends SpringValue> {
           precision: this.precision,
           axes: this.axes,
           settled: true,
-          dt: ((time - this.lastTime) * 60) / 1000,
+          dt: clampFrameDelta(((time - this.lastTime) * 60) / 1000),
         };
         const next = tick(ctx, this.lastValue, this.value, this.targetValue);
         this.lastTime = time;
@@ -175,21 +178,33 @@ export class Spring<T extends SpringValue> {
         this.notify();
         if (ctx.settled) {
           this.task = null;
+          this.resolvePending();
         }
         return !ctx.settled;
       });
-      this.task = handle;
     }
 
     return new Promise<void>((fulfil) => {
-      void handle.promise.then(() => (token === this.currentToken ? fulfil() : undefined));
+      this.resolvers.push(fulfil);
     });
+  }
+
+  private resolvePending(): void {
+    if (this.resolvers.length === 0) {
+      return;
+    }
+    const pending = this.resolvers;
+    this.resolvers = [];
+    for (const fulfil of pending) {
+      fulfil();
+    }
   }
 
   destroy(): void {
     this.cancelTask = true;
     this.task?.abort();
     this.task = null;
+    this.resolvePending();
     this.subscribers.clear();
   }
 }
