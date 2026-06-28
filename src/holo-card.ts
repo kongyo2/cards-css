@@ -4,7 +4,18 @@ import { CLASS, applyVars, buildLayerElement, cssUrl, normalizeMask } from "./do
 import { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 import { resetBaseOrientation, subscribeOrientation, type RelativeOrientation } from "./orientation.js";
 import { generateTextures, texturesToCssVariables } from "./textures.js";
-import type { CssVars, HoloCardOptions, HoloLayerOptions, ShowcaseOptions, VisualOptions } from "./types.js";
+import { paletteToCssVariables, PALETTE_VARIABLES } from "./palette.js";
+import type {
+  CssVars,
+  DepthOptions,
+  GlareOptions,
+  GyroscopeOptions,
+  HoloCardOptions,
+  HoloLayerOptions,
+  PaletteOptions,
+  ShowcaseOptions,
+  VisualOptions,
+} from "./types.js";
 
 const requestFrame = (cb: () => void): number =>
   typeof requestAnimationFrame !== "undefined" ? requestAnimationFrame(cb) : setTimeout(cb, 16);
@@ -102,6 +113,73 @@ const resolveShowcase = (showcase: boolean | ShowcaseOptions | undefined): Resol
   };
 };
 
+interface ResolvedGyroscope {
+  enabled: boolean;
+  rangeX: number;
+  rangeY: number;
+  sensitivity: number;
+  invertX: boolean;
+  invertY: boolean;
+}
+
+const DEFAULT_GYRO_RANGE_X = 16;
+const DEFAULT_GYRO_RANGE_Y = 18;
+
+const resolveGyroscope = (gyroscope: boolean | GyroscopeOptions | undefined): ResolvedGyroscope => {
+  const opts: GyroscopeOptions = gyroscope && typeof gyroscope === "object" ? gyroscope : {};
+  const enabled = typeof gyroscope === "boolean" ? gyroscope : (opts.enabled ?? true);
+  return {
+    enabled,
+    rangeX: opts.rangeX ?? DEFAULT_GYRO_RANGE_X,
+    rangeY: opts.rangeY ?? DEFAULT_GYRO_RANGE_Y,
+    sensitivity: opts.sensitivity ?? 1,
+    invertX: opts.invertX ?? false,
+    invertY: opts.invertY ?? false,
+  };
+};
+
+interface ResolvedDepth {
+  enabled: boolean;
+  strength: number;
+  perspective: number;
+  shadow: number;
+  layerScale: number;
+}
+
+const resolveDepth = (depth: boolean | DepthOptions | undefined): ResolvedDepth => {
+  const opts: DepthOptions = depth && typeof depth === "object" ? depth : {};
+  return {
+    enabled: Boolean(depth),
+    strength: opts.strength ?? 14,
+    perspective: opts.perspective ?? 600,
+    shadow: opts.shadow ?? 0.35,
+    layerScale: opts.layerScale ?? 1,
+  };
+};
+
+const DEFAULT_GLARE_STOPS = ["hsla(0, 0%, 100%, 0.8) 10%", "hsla(0, 0%, 100%, 0.65) 20%", "hsla(0, 0%, 0%, 0.5) 90%"];
+
+const composeGlareImage = (glare: GlareOptions): string | undefined => {
+  if (glare.image) {
+    return glare.image;
+  }
+  if (
+    glare.shape === undefined &&
+    glare.extent === undefined &&
+    glare.size === undefined &&
+    glare.stops === undefined
+  ) {
+    return undefined;
+  }
+  const sizeTokens = glare.size ? glare.size.trim().split(/\s+/) : [];
+  const shape = glare.shape ?? (sizeTokens.length > 1 ? "ellipse" : "circle");
+  const geometry = glare.size ? `${shape} ${glare.size}` : `${glare.extent ?? "farthest-corner"} ${shape}`;
+  const stops = (glare.stops?.length ? glare.stops : DEFAULT_GLARE_STOPS).join(", ");
+  return `radial-gradient(${geometry} at var(--pointer-x) var(--pointer-y), ${stops})`;
+};
+
+const DEPTH_VARS = ["--hc-depth", "--card-perspective", "--hc-depth-shadow", "--hc-depth-layer-scale"];
+
 interface Vec2 {
   x: number;
   y: number;
@@ -118,9 +196,8 @@ export class HoloCard {
   private readonly rotator: HTMLElement;
   private frontElement: HTMLElement | null;
   private layersElement: HTMLElement | null = null;
-  private readonly options: Required<
-    Pick<HoloCardOptions, "interactive" | "activateOnClick" | "gyroscope" | "showcase">
-  >;
+  private readonly options: Required<Pick<HoloCardOptions, "interactive" | "activateOnClick" | "showcase">>;
+  private gyroConfig: ResolvedGyroscope;
 
   private readonly springRotate: Spring<Vec2>;
   private readonly springGlare: Spring<Glare>;
@@ -177,9 +254,9 @@ export class HoloCard {
     this.options = {
       interactive: options.interactive ?? true,
       activateOnClick: options.activateOnClick ?? false,
-      gyroscope: options.gyroscope ?? true,
       showcase: options.showcase ?? false,
     };
+    this.gyroConfig = resolveGyroscope(options.gyroscope);
     this.showcaseRunning = Boolean(options.showcase);
     this.showcaseConfig = resolveShowcase(options.showcase);
 
@@ -217,6 +294,7 @@ export class HoloCard {
     } else if (!element.dataset.effect) {
       element.dataset.effect = "none";
     }
+    this.applyPalette(options.palette);
     if (options.glow) {
       element.style.setProperty("--card-glow", options.glow);
     }
@@ -245,6 +323,8 @@ export class HoloCard {
       element.style.setProperty("--foil", cssUrl(options.foil));
     }
     this.applyVisual(options.visual);
+    this.applyGlare(options.glare);
+    this.applyDepth(options.depth);
     applyVars(element, options.vars);
 
     if (!this.layersElement && options.layers?.length && this.frontElement) {
@@ -313,6 +393,58 @@ export class HoloCard {
     if (visual.imageFit !== undefined) {
       style.setProperty("--imgsize", visual.imageFit);
     }
+  }
+
+  private applyPalette(palette: PaletteOptions | undefined): void {
+    if (!palette) {
+      return;
+    }
+    const style = this.element.style;
+    const vars = paletteToCssVariables(palette);
+    for (const name of PALETTE_VARIABLES) {
+      style.removeProperty(name);
+    }
+    for (const [name, value] of Object.entries(vars)) {
+      style.setProperty(name, value);
+    }
+  }
+
+  private applyGlare(glare: GlareOptions | undefined): void {
+    if (!glare) {
+      return;
+    }
+    const style = this.element.style;
+    style.removeProperty("--glare-image");
+    style.removeProperty("--glare-blend");
+    this.element.classList.remove(CLASS.customGlare);
+    if (typeof glare.opacity === "number") {
+      style.setProperty("--hc-glare-opacity", String(glare.opacity));
+    }
+    if (glare.blend !== undefined) {
+      style.setProperty("--glare-blend", glare.blend);
+    }
+    const image = composeGlareImage(glare);
+    if (image !== undefined) {
+      style.setProperty("--glare-image", image);
+      this.element.classList.add(CLASS.customGlare);
+    }
+  }
+
+  private applyDepth(depth: boolean | DepthOptions | undefined): void {
+    const style = this.element.style;
+    const config = resolveDepth(depth);
+    if (!config.enabled) {
+      this.element.classList.remove(CLASS.depth);
+      for (const name of DEPTH_VARS) {
+        style.removeProperty(name);
+      }
+      return;
+    }
+    this.element.classList.add(CLASS.depth);
+    style.setProperty("--hc-depth", `${config.strength}px`);
+    style.setProperty("--card-perspective", `${config.perspective}px`);
+    style.setProperty("--hc-depth-shadow", String(config.shadow));
+    style.setProperty("--hc-depth-layer-scale", String(config.layerScale));
   }
 
   private applyStaticStyles(seed: number | undefined): void {
@@ -531,7 +663,7 @@ export class HoloCard {
       this.popover();
       this.element.classList.add(CLASS.active);
       this.element.style.setProperty("--card-active", "1");
-      if (this.options.gyroscope) {
+      if (this.gyroConfig.enabled) {
         this.startGyroscope();
       }
     } else {
@@ -607,20 +739,25 @@ export class HoloCard {
     if (getActiveCard() !== this) {
       return;
     }
-    const limit = { x: 16, y: 18 };
+    const gyro = this.gyroConfig;
+    const limit = { x: gyro.rangeX, y: gyro.rangeY };
+    const dirX = gyro.invertX ? -1 : 1;
+    const dirY = gyro.invertY ? -1 : 1;
     const degrees = {
-      x: clamp(orientation.relative.gamma, -limit.x, limit.x),
-      y: clamp(orientation.relative.beta, -limit.y, limit.y),
+      x: clamp(orientation.relative.gamma * gyro.sensitivity * dirX, -limit.x, limit.x),
+      y: clamp(orientation.relative.beta * gyro.sensitivity * dirY, -limit.y, limit.y),
     };
-    const gx = adjust(degrees.x, -limit.x, limit.x, 0, 100);
-    const gy = adjust(degrees.y, -limit.y, limit.y, 0, 100);
+    const fracX = limit.x === 0 ? 0 : degrees.x / limit.x;
+    const fracY = limit.y === 0 ? 0 : degrees.y / limit.y;
+    const gx = adjust(fracX, -1, 1, 0, 100);
+    const gy = adjust(fracY, -1, 1, 0, 100);
     this.setInteracting(true);
     this.updateSprings(
-      this.parallaxBackground(
-        adjust(degrees.x, -limit.x, limit.x, 37, 63),
-        adjust(degrees.y, -limit.y, limit.y, 33, 67),
-      ),
-      { x: round(degrees.x * -1 * this.tiltScaleX), y: round(degrees.y * this.tiltScaleY) },
+      this.parallaxBackground(adjust(fracX, -1, 1, 37, 63), adjust(fracY, -1, 1, 33, 67)),
+      {
+        x: round(fracX * DEFAULT_GYRO_RANGE_X * -1 * this.tiltScaleX),
+        y: round(fracY * DEFAULT_GYRO_RANGE_Y * this.tiltScaleY),
+      },
       this.rangeGlare(gx, gy, 1),
       { x: gx, y: gy },
     );
@@ -737,6 +874,47 @@ export class HoloCard {
   /** Update fine-grained visual controls at runtime. */
   setVisual(visual: VisualOptions): void {
     this.applyVisual(visual);
+  }
+
+  /**
+   * Swap the foil colour palette / theme at runtime. This is a full replacement:
+   * any palette variable not present in `palette` reverts to its default.
+   */
+  setPalette(palette: PaletteOptions): void {
+    this.applyPalette(palette);
+  }
+
+  /**
+   * Update the dynamic glare (reflected light) at runtime. The image / shape /
+   * blend are replaced wholesale — omit them to return to the effect's built-in
+   * glare. `opacity` is shared with `visual.glareOpacity` and only changes when
+   * provided.
+   */
+  setGlare(glare: GlareOptions): void {
+    this.applyGlare(glare);
+  }
+
+  /** Toggle or tune the foil 3D depth / extrusion at runtime. */
+  setDepth(depth: boolean | DepthOptions): void {
+    this.applyDepth(depth);
+  }
+
+  /** Update the gyroscope physical-behaviour tuning at runtime. */
+  setGyroscope(gyroscope: boolean | GyroscopeOptions): void {
+    const wasEnabled = this.gyroConfig.enabled;
+    this.gyroConfig = resolveGyroscope(gyroscope);
+    if (getActiveCard() !== this) {
+      return;
+    }
+    if (this.gyroConfig.enabled) {
+      if (!wasEnabled) {
+        resetBaseOrientation();
+      }
+      this.startGyroscope();
+    } else {
+      this.stopGyroscope();
+      this.interactEnd(0);
+    }
   }
 
   /**

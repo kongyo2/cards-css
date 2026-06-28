@@ -19,6 +19,8 @@ export const CLASS = {
   loading: "holo-card--loading",
   masked: "holo-card--masked",
   maskCard: "holo-card--mask-card",
+  depth: "holo-card--depth",
+  customGlare: "holo-card--custom-glare",
   overlayInteractive: "holo-card__overlay--interactive",
 } as const;
 

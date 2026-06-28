@@ -110,7 +110,7 @@
 .holo-card[data-effect="holo"] .holo-card__glare {
   opacity: calc(var(--card-opacity) * 0.8 * var(--hc-glare-opacity));
   filter: brightness(0.8) contrast(1.5);
-  mix-blend-mode: overlay;
+  mix-blend-mode: var(--glare-blend, overlay);
 }
 
 .holo-card[data-effect="holo"] .holo-card__glare::after {

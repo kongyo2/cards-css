@@ -8,6 +8,7 @@ const CARDS = [
     rarity: "Mythic",
     physics: { maxTilt: 18 },
     visual: { saturate: 1.1 },
+    depth: { strength: 12 },
   },
   {
     effect: "reverse",
@@ -15,6 +16,11 @@ const CARDS = [
     name: "Leviathan",
     rarity: "Legendary",
     physics: { parallax: 1.3, glareRange: 1.1 },
+    glare: {
+      shape: "ellipse",
+      size: "75% 60%",
+      stops: ["hsla(190, 100%, 92%, 0.85) 0%", "hsla(210, 90%, 60%, 0.35) 45%", "hsla(0, 0%, 0%, 0.7) 100%"],
+    },
   },
   {
     effect: "cosmos",
@@ -24,6 +30,7 @@ const CARDS = [
     textureSeed: 222,
     physics: { maxTiltX: 16, maxTiltY: 11, parallax: 1.2 },
     showcase: { intensity: 30 },
+    palette: { preset: "aurora" },
   },
   {
     effect: "glitter",
@@ -33,6 +40,7 @@ const CARDS = [
     textureSeed: 777,
     physics: { glareRange: 1.2, springs: { rotate: { axes: { x: { stiffness: 0.09 } } } } },
     visual: { brightness: 1.05 },
+    gyroscope: { sensitivity: 1.4, rangeX: 14 },
   },
 ];
 
@@ -55,6 +63,10 @@ for (const def of CARDS) {
     activateOnClick: true,
     physics: def.physics,
     ...(def.visual ? { visual: def.visual } : {}),
+    ...(def.palette ? { palette: def.palette } : {}),
+    ...(def.glare ? { glare: def.glare } : {}),
+    ...(def.depth ? { depth: def.depth } : {}),
+    ...(def.gyroscope !== undefined ? { gyroscope: def.gyroscope } : {}),
     overlay: rarityPlate(def.rarity),
     ...(typeof def.textureSeed === "number" ? { textureSeed: def.textureSeed } : {}),
   });

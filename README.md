@@ -59,13 +59,16 @@ Set via the `effect` option (or `card.setEffect(...)` at runtime):
 | `effect`          | `HoloEffect` | `"none"` | One of the effects above                        |
 | `interactive`     | `boolean` | `true`   | React to pointer move                              |
 | `activateOnClick` | `boolean` | `false`  | Click to pop the card into a centered showcase     |
-| `gyroscope`       | `boolean` | `true`   | Tilt to device orientation while active            |
+| `gyroscope`       | `boolean \| GyroscopeOptions` | `true` | Tilt to device orientation while active; pass an object to tune `rangeX` / `rangeY` / `sensitivity` / `invertX` / `invertY` |
 | `showcase`        | `boolean \| ShowcaseOptions` | `false` | Auto-animate once on mount; pass an object to tune `delay` / `duration` / `loop` / `speed` / `intensity` / `spring` |
 | `glow`            | `string`  | —        | CSS color for the card glow                        |
 | `aspectRatio`     | `number`  | —        | Card aspect ratio (width / height)                 |
 | `textureSeed`     | `number`  | —        | Seed for the generated `cosmos` / `glitter` textures; without it those two foils render without their procedural layers |
 | `mask`            | `string \| MaskOptions` | — | Mask URL, or `{ image, size, position, repeat, mode }` — `mode: "card"` clips the whole card into the mask silhouette |
 | `foil`            | `string`  | —        | URL for a custom foil overlay                      |
+| `palette`         | `PaletteOptions` | — | Foil colour theming: a `preset` (`rainbow` / `gold` / `aurora` / `ruby` / `sapphire` / `mono`) and/or custom `sunpillars` / `spectrum` / `cosmos` colour stops plus `edge` / `back` / `glow` |
+| `glare`           | `GlareOptions` | — | Custom dynamic glare: a full `image`, or compose the pointer-tracking gradient from `shape` / `extent` / `size` / `stops`, plus `blend` / `opacity` |
+| `depth`           | `boolean \| DepthOptions` | — | Foil 3D depth / extrusion: `true` for defaults, or tune `strength` / `perspective` / `shadow` / `layerScale` |
 | `physics`         | `PhysicsOptions` | — | Interaction tuning: `maxTilt` / `maxTiltX` / `maxTiltY`, `parallax`, `glareRange`, `returnDelay`, and per-target spring tuning (`interactSpring` / `popoverSpring` / `snapSpring` / `springs`) |
 | `visual`          | `VisualOptions` | — | Foil multipliers (`brightness` / `contrast` / `saturate` / `glareOpacity` / `shineOpacity`) and `lineSpace` / `lineAngle` / `glitterSize` / `imageFit` |
 | `layers`          | `HoloLayerOptions[]` | — | Extra stacked layers between artwork and foil, each with `image` / `content`, `blend`, `opacity`, `parallax`, `mask` |
@@ -108,6 +111,10 @@ or react in lockstep with the foil.
   - `activate()` / `deactivate()` — pop the card in / out of showcase.
   - `setEffect(effect)` — swap the foil at runtime.
   - `setVisual(visual)` / `setVars(vars)` — update visual controls / CSS variables at runtime.
+  - `setPalette(palette)` — recolour the foil / swap themes at runtime.
+  - `setGlare(glare)` — update the dynamic glare at runtime.
+  - `setDepth(depth)` — toggle or tune the 3D depth at runtime (`false` disables it).
+  - `setGyroscope(gyroscope)` — update gyroscope tuning at runtime.
   - `addLayer(options)` — insert an extra layer between artwork and foil, returns the element.
   - `destroy()` — remove listeners and reset the element.
 

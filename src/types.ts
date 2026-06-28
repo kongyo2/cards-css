@@ -65,6 +65,93 @@ export interface ShowcaseOptions {
   spring?: SpringTuning;
 }
 
+/** Built-in foil colour schemes for {@link PaletteOptions.preset}. */
+export type PalettePreset = "rainbow" | "gold" | "aurora" | "ruby" | "sapphire" | "mono";
+
+/**
+ * Foil colour-palette / theming. Every field maps onto the foil CSS custom
+ * properties, so a palette can be supplied up front or swapped at runtime with
+ * `card.setPalette(...)`. Colours accept any CSS colour string.
+ */
+export interface PaletteOptions {
+  /** A built-in scheme used as the base; the explicit fields below override it. */
+  preset?: PalettePreset;
+  /** Holographic spectrum stops (`--sunpillar-1…6`). 1–6 colours; fewer are cycled to fill the ramp. */
+  sunpillars?: string[];
+  /** Rainbow stops for the `holo` foil sweep (`--red` / `--yellow` / `--green` / `--blue` / `--violet`). 1–5 colours, cycled. */
+  spectrum?: string[];
+  /** Ramp stops for the `cosmos` foil (`--cosmos-clr-1…6`). 1–6 colours, cycled. */
+  cosmos?: string[];
+  /** Card edge highlight colour (`--card-edge`). */
+  edge?: string;
+  /** Card back fill colour (`--card-back`). */
+  back?: string;
+  /** Card glow colour (`--card-glow`); equivalent to the top-level `glow` option. */
+  glow?: string;
+}
+
+/**
+ * Custom dynamic glare (reflected light). Supply a full `image` for total
+ * control, or compose the built-in pointer-tracking radial gradient from
+ * `shape` / `extent` / `size` / `stops`. Applies across every effect and can be
+ * updated at runtime with `card.setGlare(...)`.
+ */
+export interface GlareOptions {
+  /**
+   * Full `background-image` for the glare layer, overriding the built-in
+   * gradient on every effect. `var(--pointer-x)` / `var(--pointer-y)` are
+   * available for pointer tracking.
+   */
+  image?: string;
+  /** Radial-gradient shape when composing the gradient (default `circle`). */
+  shape?: "circle" | "ellipse";
+  /** Radial-gradient extent keyword, e.g. `farthest-corner` / `closest-side` (default `farthest-corner`). */
+  extent?: string;
+  /** Explicit gradient size — two values imply an ellipse (e.g. `60% 40%`), a single value a circle radius (e.g. `120px`); overrides `extent` when set. */
+  size?: string;
+  /** Colour stops, e.g. `["hsla(0,0%,100%,.8) 10%", "hsla(0,0%,0%,.5) 90%"]`. */
+  stops?: string[];
+  /** `mix-blend-mode` for the glare layer. */
+  blend?: string;
+  /** Glare opacity multiplier (mirrors `visual.glareOpacity`). */
+  opacity?: number;
+}
+
+/**
+ * Physical-behaviour tuning for the device-orientation (gyroscope) response.
+ * Passing `true` keeps the defaults; `false` disables gyroscope tilt.
+ */
+export interface GyroscopeOptions {
+  /** Master switch (default true); `false` matches `gyroscope: false`. */
+  enabled?: boolean;
+  /** Device tilt (deg) on the X axis (gamma) that reaches the full effect (default 16). Lower is more sensitive. */
+  rangeX?: number;
+  /** Device tilt (deg) on the Y axis (beta) that reaches the full effect (default 18). */
+  rangeY?: number;
+  /** Sensitivity multiplier applied to the raw tilt before clamping (default 1). */
+  sensitivity?: number;
+  /** Flip the horizontal response. */
+  invertX?: boolean;
+  /** Flip the vertical response. */
+  invertY?: boolean;
+}
+
+/**
+ * Foil 3D depth / extrusion simulation. Lifts the foil stack above the artwork
+ * in true 3D so it parallaxes as the card tilts, with a tilt-reactive contact
+ * shadow. Passing `true` enables it with the defaults.
+ */
+export interface DepthOptions {
+  /** Foil extrusion height in px — how far the foil floats above the artwork (default 14). */
+  strength?: number;
+  /** Perspective in px for the card's 3D space; lower exaggerates the depth (default 600). */
+  perspective?: number;
+  /** Contact-shadow opacity beneath the lifted card, 0–1 (default 0.35). */
+  shadow?: number;
+  /** Multiplier turning each extra layer's `parallax` into Z-lift, so stacked layers extrude in depth (default 1). */
+  layerScale?: number;
+}
+
 /** Fine-grained visual / effect control. Numeric fields are multipliers (1 = unchanged). */
 export interface VisualOptions {
   /** Foil brightness multiplier. */
@@ -133,13 +220,20 @@ export interface HoloCardOptions {
   effect?: HoloEffect;
   interactive?: boolean;
   activateOnClick?: boolean;
-  gyroscope?: boolean;
+  /** Device-orientation tilt: `true`/`false`, or an object for physical-behaviour tuning. */
+  gyroscope?: boolean | GyroscopeOptions;
   showcase?: boolean | ShowcaseOptions;
   glow?: string;
   aspectRatio?: number;
   textureSeed?: number;
   mask?: string | MaskOptions;
   foil?: string;
+  /** Foil colour palette / theming. */
+  palette?: PaletteOptions;
+  /** Custom dynamic glare (reflected light). */
+  glare?: GlareOptions;
+  /** Foil 3D depth / extrusion: `true` for the defaults, or an object to tune it. */
+  depth?: boolean | DepthOptions;
   /** Interaction & physics adjustments. */
   physics?: PhysicsOptions;
   /** Fine-grained visual control. */

@@ -123,7 +123,7 @@
 .holo-card__translater,
 .holo-card__rotator {
   display: grid;
-  perspective: 600px;
+  perspective: var(--card-perspective, 600px);
   will-change: transform, box-shadow;
   transform-origin: center;
   transform-style: preserve-3d;
@@ -270,14 +270,21 @@ button.holo-card__rotator {
 .holo-card__glare {
   transform: translateZ(1.41px);
   overflow: hidden;
-  background-image: radial-gradient(
-    farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    hsla(0, 0%, 100%, 0.8) 10%,
-    hsla(0, 0%, 100%, 0.65) 20%,
-    hsla(0, 0%, 0%, 0.5) 90%
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.8) 10%,
+      hsla(0, 0%, 100%, 0.65) 20%,
+      hsla(0, 0%, 0%, 0.5) 90%
+    )
   );
   opacity: calc(var(--card-opacity) * var(--hc-glare-opacity));
-  mix-blend-mode: overlay;
+  mix-blend-mode: var(--glare-blend, overlay);
+}
+
+.holo-card--custom-glare .holo-card__glare::after {
+  display: none !important;
 }
 
 .holo-card--masked .holo-card__shine,
@@ -348,4 +355,37 @@ button.holo-card__rotator {
 .holo-card__overlay--interactive,
 .holo-card__overlay--interactive * {
   pointer-events: auto;
+}
+
+.holo-card--depth .holo-card__shine {
+  transform: translateZ(calc(1px + var(--hc-depth, 0px)));
+}
+
+.holo-card--depth .holo-card__glare {
+  transform: translateZ(calc(1.41px + var(--hc-depth, 0px)));
+}
+
+.holo-card--depth .holo-card__overlay {
+  transform: translateZ(calc(2px + var(--hc-depth, 0px)));
+}
+
+.holo-card--depth .holo-card__layer {
+  transform: translate3d(
+    calc(var(--pointer-dx) * var(--layer-parallax) * 1px),
+    calc(var(--pointer-dy) * var(--layer-parallax) * 1px),
+    calc(0.02px + var(--layer-parallax) * var(--hc-depth-layer-scale, 1) * 1px)
+  );
+}
+
+.holo-card--depth .holo-card__translater::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: var(--card-radius);
+  background: transparent;
+  transform: translateZ(-1px);
+  pointer-events: none;
+  box-shadow: calc(var(--tilt-x, 0) * -0.6px) calc(var(--hc-depth, 0px) * 0.5 + var(--tilt-y, 0) * 0.6px)
+    calc(var(--hc-depth, 0px) * 1.2 + 14px) calc(var(--hc-depth, 0px) * 0.2) rgba(0, 0, 0, var(--hc-depth-shadow, 0));
 }
