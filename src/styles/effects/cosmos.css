@@ -1,6 +1,13 @@
 .holo-card[data-effect="cosmos"] {
   --space: 4%;
   --angle: 82deg;
+
+  --cosmos-clr-1: hsl(53, 65%, 60%);
+  --cosmos-clr-2: hsl(93, 56%, 50%);
+  --cosmos-clr-3: hsl(176, 54%, 49%);
+  --cosmos-clr-4: hsl(228, 59%, 55%);
+  --cosmos-clr-5: hsl(283, 60%, 55%);
+  --cosmos-clr-6: hsl(326, 59%, 51%);
 }
 
 .holo-card[data-effect="cosmos"] .holo-card__shine {
@@ -8,18 +15,18 @@
     var(--hc-cosmos-bottom),
     repeating-linear-gradient(
       var(--angle),
-      hsl(53, 65%, 60%) calc(var(--space) * 1),
-      hsl(93, 56%, 50%) calc(var(--space) * 2),
-      hsl(176, 54%, 49%) calc(var(--space) * 3),
-      hsl(228, 59%, 55%) calc(var(--space) * 4),
-      hsl(283, 60%, 55%) calc(var(--space) * 5),
-      hsl(326, 59%, 51%) calc(var(--space) * 6),
-      hsl(326, 59%, 51%) calc(var(--space) * 7),
-      hsl(283, 60%, 55%) calc(var(--space) * 8),
-      hsl(228, 59%, 55%) calc(var(--space) * 9),
-      hsl(176, 54%, 49%) calc(var(--space) * 10),
-      hsl(93, 56%, 50%) calc(var(--space) * 11),
-      hsl(53, 65%, 60%) calc(var(--space) * 12)
+      var(--cosmos-clr-1) calc(var(--space) * 1),
+      var(--cosmos-clr-2) calc(var(--space) * 2),
+      var(--cosmos-clr-3) calc(var(--space) * 3),
+      var(--cosmos-clr-4) calc(var(--space) * 4),
+      var(--cosmos-clr-5) calc(var(--space) * 5),
+      var(--cosmos-clr-6) calc(var(--space) * 6),
+      var(--cosmos-clr-6) calc(var(--space) * 7),
+      var(--cosmos-clr-5) calc(var(--space) * 8),
+      var(--cosmos-clr-4) calc(var(--space) * 9),
+      var(--cosmos-clr-3) calc(var(--space) * 10),
+      var(--cosmos-clr-2) calc(var(--space) * 11),
+      var(--cosmos-clr-1) calc(var(--space) * 12)
     ),
     radial-gradient(
       farthest-corner circle at var(--pointer-x) var(--pointer-y),
@@ -52,18 +59,18 @@
     var(--hc-cosmos-middle),
     repeating-linear-gradient(
       var(--angle),
-      hsl(53, 65%, 60%) calc(var(--space) * 1),
-      hsl(93, 56%, 50%) calc(var(--space) * 2),
-      hsl(176, 54%, 49%) calc(var(--space) * 3),
-      hsl(228, 59%, 55%) calc(var(--space) * 4),
-      hsl(283, 60%, 55%) calc(var(--space) * 5),
-      hsl(326, 59%, 51%) calc(var(--space) * 6),
-      hsl(326, 59%, 51%) calc(var(--space) * 7),
-      hsl(283, 60%, 55%) calc(var(--space) * 8),
-      hsl(228, 59%, 55%) calc(var(--space) * 9),
-      hsl(176, 54%, 49%) calc(var(--space) * 10),
-      hsl(93, 56%, 50%) calc(var(--space) * 11),
-      hsl(53, 65%, 60%) calc(var(--space) * 12)
+      var(--cosmos-clr-1) calc(var(--space) * 1),
+      var(--cosmos-clr-2) calc(var(--space) * 2),
+      var(--cosmos-clr-3) calc(var(--space) * 3),
+      var(--cosmos-clr-4) calc(var(--space) * 4),
+      var(--cosmos-clr-5) calc(var(--space) * 5),
+      var(--cosmos-clr-6) calc(var(--space) * 6),
+      var(--cosmos-clr-6) calc(var(--space) * 7),
+      var(--cosmos-clr-5) calc(var(--space) * 8),
+      var(--cosmos-clr-4) calc(var(--space) * 9),
+      var(--cosmos-clr-3) calc(var(--space) * 10),
+      var(--cosmos-clr-2) calc(var(--space) * 11),
+      var(--cosmos-clr-1) calc(var(--space) * 12)
     );
 
   background-blend-mode: lighten, multiply;
@@ -90,18 +97,18 @@
     var(--hc-cosmos-top),
     repeating-linear-gradient(
       var(--angle),
-      hsl(53, 65%, 60%) calc(var(--space) * 1),
-      hsl(93, 56%, 50%) calc(var(--space) * 2),
-      hsl(176, 54%, 49%) calc(var(--space) * 3),
-      hsl(228, 59%, 55%) calc(var(--space) * 4),
-      hsl(283, 60%, 55%) calc(var(--space) * 5),
-      hsl(326, 59%, 51%) calc(var(--space) * 6),
-      hsl(326, 59%, 51%) calc(var(--space) * 7),
-      hsl(283, 60%, 55%) calc(var(--space) * 8),
-      hsl(228, 59%, 55%) calc(var(--space) * 9),
-      hsl(176, 54%, 49%) calc(var(--space) * 10),
-      hsl(93, 56%, 50%) calc(var(--space) * 11),
-      hsl(53, 65%, 60%) calc(var(--space) * 12)
+      var(--cosmos-clr-1) calc(var(--space) * 1),
+      var(--cosmos-clr-2) calc(var(--space) * 2),
+      var(--cosmos-clr-3) calc(var(--space) * 3),
+      var(--cosmos-clr-4) calc(var(--space) * 4),
+      var(--cosmos-clr-5) calc(var(--space) * 5),
+      var(--cosmos-clr-6) calc(var(--space) * 6),
+      var(--cosmos-clr-6) calc(var(--space) * 7),
+      var(--cosmos-clr-5) calc(var(--space) * 8),
+      var(--cosmos-clr-4) calc(var(--space) * 9),
+      var(--cosmos-clr-3) calc(var(--space) * 10),
+      var(--cosmos-clr-2) calc(var(--space) * 11),
+      var(--cosmos-clr-1) calc(var(--space) * 12)
     );
 
   background-blend-mode: multiply, multiply;
@@ -121,13 +128,16 @@
 }
 
 .holo-card[data-effect="cosmos"] .holo-card__glare {
-  background-image: radial-gradient(
-    farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    hsla(204, 100%, 95%, 0.8) 5%,
-    hsla(250, 15%, 20%, 1) 150%
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(204, 100%, 95%, 0.8) 5%,
+      hsla(250, 15%, 20%, 1) 150%
+    )
   );
   filter: brightness(0.75) contrast(2) saturate(2);
-  mix-blend-mode: overlay;
+  mix-blend-mode: var(--glare-blend, overlay);
   opacity: calc(var(--card-opacity) * (0.25 + var(--pointer-from-center)) * var(--hc-glare-opacity));
 }
 

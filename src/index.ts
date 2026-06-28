@@ -21,6 +21,7 @@ export {
   type Orientation,
   type RelativeOrientation,
 } from "./orientation.js";
+export { PALETTES, resolvePalette, paletteToCssVariables } from "./palette.js";
 export { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 export { Spring, type SpringValue, type SpringOpts, type SpringSetOpts, type SpringDynamics } from "./spring.js";
 export { round, clamp, adjust } from "./math.js";
@@ -36,6 +37,11 @@ export type {
   VisualOptions,
   MaskOptions,
   HoloLayerOptions,
+  PaletteOptions,
+  PalettePreset,
+  GlareOptions,
+  GyroscopeOptions,
+  DepthOptions,
 } from "./types.js";
 
 export const createHoloCard = (options: CreateHoloCardOptions): HoloCard => {

@@ -66,21 +66,27 @@
 }
 
 .holo-card[data-effect="glitter"]:not(.holo-card--masked) .holo-card__glare {
-  background-image: radial-gradient(
-    farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    hsla(0, 0%, 100%, 1) 10%,
-    hsla(0, 0%, 100%, 0.85) 20%,
-    hsla(0, 0%, 0%, 0.35) 90%
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 1) 10%,
+      hsla(0, 0%, 100%, 0.85) 20%,
+      hsla(0, 0%, 0%, 0.35) 90%
+    )
   );
-  mix-blend-mode: multiply;
+  mix-blend-mode: var(--glare-blend, multiply);
 }
 
 .holo-card--masked[data-effect="glitter"] .holo-card__glare {
-  background-image: radial-gradient(
-    farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    hsla(50, 20%, 90%, 0.45) 0%,
-    hsla(150, 20%, 30%, 0.45) 45%,
-    hsla(0, 0%, 0%, 0.9) 120%
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(50, 20%, 90%, 0.45) 0%,
+      hsla(150, 20%, 30%, 0.45) 45%,
+      hsla(0, 0%, 0%, 0.9) 120%
+    )
   );
   filter: brightness(0.9) contrast(2);
 }
