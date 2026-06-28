@@ -180,6 +180,26 @@ const composeGlareImage = (glare: GlareOptions): string | undefined => {
 
 const DEPTH_VARS = ["--hc-depth", "--card-perspective", "--hc-depth-shadow", "--hc-depth-layer-scale"];
 
+const RENDER_VARS = [
+  "--pointer-x",
+  "--pointer-y",
+  "--pointer-from-center",
+  "--pointer-from-top",
+  "--pointer-from-left",
+  "--pointer-dx",
+  "--pointer-dy",
+  "--card-opacity",
+  "--rotate-x",
+  "--rotate-y",
+  "--tilt-x",
+  "--tilt-y",
+  "--background-x",
+  "--background-y",
+  "--card-scale",
+  "--translate-x",
+  "--translate-y",
+];
+
 interface Vec2 {
   x: number;
   y: number;
@@ -628,6 +648,14 @@ export class HoloCard {
   }
 
   private applyStyles(): void {
+    if (!this.options.interactive && !this.isInteracting && !this.active) {
+      const style = this.element.style;
+      for (const name of RENDER_VARS) {
+        style.removeProperty(name);
+      }
+      return;
+    }
+
     const glare = this.springGlare.current;
     const rotate = this.springRotate.current;
     const rotateDelta = this.springRotateDelta.current;

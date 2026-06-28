@@ -42,6 +42,7 @@
 .holo-card {
   --grain: var(--hc-grain, none);
   --glitter: var(--hc-glitter, none);
+  --foil: none;
   --glittersize: 25%;
 
   --space: 5%;
