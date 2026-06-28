@@ -423,6 +423,7 @@ export class HoloCard {
     const image = composeGlareImage(glare);
     if (image !== undefined) {
       style.setProperty("--glare-image", image);
+      this.element.classList.add(CLASS.customGlare);
     }
   }
 
@@ -892,11 +893,15 @@ export class HoloCard {
 
   /** Update the gyroscope physical-behaviour tuning at runtime. */
   setGyroscope(gyroscope: boolean | GyroscopeOptions): void {
+    const wasEnabled = this.gyroConfig.enabled;
     this.gyroConfig = resolveGyroscope(gyroscope);
     if (getActiveCard() !== this) {
       return;
     }
     if (this.gyroConfig.enabled) {
+      if (!wasEnabled) {
+        resetBaseOrientation();
+      }
       this.startGyroscope();
     } else {
       this.stopGyroscope();

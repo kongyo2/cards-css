@@ -283,6 +283,10 @@ button.holo-card__rotator {
   mix-blend-mode: var(--glare-blend, overlay);
 }
 
+.holo-card--custom-glare .holo-card__glare::after {
+  display: none !important;
+}
+
 .holo-card--masked .holo-card__shine,
 .holo-card--masked .holo-card__shine::before,
 .holo-card--masked .holo-card__shine::after {
