@@ -104,7 +104,8 @@ export class Spring<T extends SpringValue> {
   private cancelTask = false;
   private task: TaskHandle | null = null;
   private lastTime = 0;
-  private resolvers: Array<() => void> = [];
+  private settlePromise: Promise<void> | null = null;
+  private settleResolve: (() => void) | null = null;
   private readonly subscribers = new Subscribers<T>(() => this.value);
 
   constructor(value: T, opts: SpringOpts = {}) {
@@ -131,7 +132,6 @@ export class Spring<T extends SpringValue> {
 
   set(newValue: T, opts: SpringSetOpts = {}): Promise<void> {
     this.targetValue = newValue;
-    this.resolvePending();
 
     if (opts.hard || (this.stiffness >= 1 && this.damping >= 1)) {
       this.cancelTask = true;
@@ -143,6 +143,7 @@ export class Spring<T extends SpringValue> {
       this.lastValue = newValue;
       this.value = newValue;
       this.notify();
+      this.resolveSettle();
       return Promise.resolve();
     }
 
@@ -178,33 +179,32 @@ export class Spring<T extends SpringValue> {
         this.notify();
         if (ctx.settled) {
           this.task = null;
-          this.resolvePending();
+          this.resolveSettle();
         }
         return !ctx.settled;
       });
     }
 
-    return new Promise<void>((fulfil) => {
-      this.resolvers.push(fulfil);
-    });
+    if (!this.settlePromise) {
+      this.settlePromise = new Promise<void>((resolve) => {
+        this.settleResolve = resolve;
+      });
+    }
+    return this.settlePromise;
   }
 
-  private resolvePending(): void {
-    if (this.resolvers.length === 0) {
-      return;
-    }
-    const pending = this.resolvers;
-    this.resolvers = [];
-    for (const fulfil of pending) {
-      fulfil();
-    }
+  private resolveSettle(): void {
+    const resolve = this.settleResolve;
+    this.settlePromise = null;
+    this.settleResolve = null;
+    resolve?.();
   }
 
   destroy(): void {
     this.cancelTask = true;
     this.task?.abort();
     this.task = null;
-    this.resolvePending();
+    this.resolveSettle();
     this.subscribers.clear();
   }
 }
