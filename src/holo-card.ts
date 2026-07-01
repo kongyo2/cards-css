@@ -45,6 +45,13 @@ const stopInterval = (id: ReturnType<typeof setInterval> | null): null => {
 const prefersReducedMotion = (): boolean =>
   typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Elements that natively turn Enter (buttons also Space) into click events and
+// carry their own semantics — keyboard activation is left to the browser there.
+const isNativeActivator = (element: HTMLElement): boolean => {
+  const tag = element.tagName;
+  return tag === "BUTTON" || tag === "INPUT" || tag === "SUMMARY" || (tag === "A" && element.hasAttribute("href"));
+};
+
 const SPRING_INTERACT = { stiffness: 0.066, damping: 0.25 };
 const SPRING_POPOVER = { stiffness: 0.033, damping: 0.45 };
 const SNAP_STIFFNESS = 0.01;
@@ -545,15 +552,19 @@ export class HoloCard {
         this.rotator.tabIndex = 0;
         this.cleanups.push(() => this.rotator.removeAttribute("tabindex"));
       }
-      this.manageAriaPressed = true;
-      this.rotator.setAttribute("aria-pressed", "false");
-      this.cleanups.push(() => {
-        this.rotator.removeAttribute("aria-pressed");
-        this.manageAriaPressed = false;
-      });
+      const nativeActivator = isNativeActivator(this.rotator);
+      // aria-pressed belongs on button-like rotators only, and only when the
+      // consumer is not already managing the attribute themselves.
+      if ((!nativeActivator || this.rotator.tagName === "BUTTON") && !this.rotator.hasAttribute("aria-pressed")) {
+        this.manageAriaPressed = true;
+        this.rotator.setAttribute("aria-pressed", "false");
+        this.cleanups.push(() => {
+          this.rotator.removeAttribute("aria-pressed");
+          this.manageAriaPressed = false;
+        });
+      }
 
-      // Native buttons already fire `click` for Enter/Space and expose a role.
-      if (this.rotator.tagName !== "BUTTON") {
+      if (!nativeActivator) {
         if (!this.rotator.hasAttribute("role")) {
           this.rotator.setAttribute("role", "button");
           this.cleanups.push(() => this.rotator.removeAttribute("role"));
@@ -561,16 +572,17 @@ export class HoloCard {
         // Only keystrokes aimed at the rotator itself count — events bubbling
         // up from focusable content (interactive overlays, links) must keep
         // their native behaviour. Space toggles on keyup per the ARIA button
-        // pattern; keydown only swallows it so the page does not scroll.
+        // pattern; keydown swallows it (key repeats included) so the page
+        // does not scroll, while Enter activates on first keydown only.
         const onKeyDown = (event: KeyboardEvent): void => {
-          if (event.target !== this.rotator || event.repeat) {
+          if (event.target !== this.rotator) {
             return;
           }
-          if (event.key === "Enter") {
+          if (event.key === " ") {
+            event.preventDefault();
+          } else if (event.key === "Enter" && !event.repeat) {
             event.preventDefault();
             this.toggleActive();
-          } else if (event.key === " ") {
-            event.preventDefault();
           }
         };
         const onKeyUp = (event: KeyboardEvent): void => {

@@ -35,18 +35,23 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Keyboard accessibility for `activateOnClick`: non-button rotators get
-  `role="button"` and respond to <kbd>Enter</kbd> / <kbd>Space</kbd> (Space on
-  keyup, per the ARIA button pattern), and the rotator reflects its state via
-  `aria-pressed`. Keystrokes from focusable content nested inside the card
-  (interactive overlays, links) keep their native behaviour. Everything added
-  (role, tabindex, aria-pressed, listeners) is removed again on `destroy()`.
+- Keyboard accessibility for `activateOnClick`: rotators without native
+  activation semantics get `role="button"` and respond to <kbd>Enter</kbd> /
+  <kbd>Space</kbd> (Space on keyup, per the ARIA button pattern, with key
+  repeats swallowed so the page never scrolls), and button-like rotators
+  reflect their state via `aria-pressed` unless the consumer already manages
+  that attribute. Native activators (buttons, links, inputs) keep the
+  browser's own Enter/Space handling — no double toggles — and keystrokes
+  from focusable content nested inside the card keep their native behaviour.
+  Everything added (role, tabindex, aria-pressed, listeners) is removed again
+  on `destroy()`.
 - The showcase auto-animation now respects `prefers-reduced-motion` by default;
   opt out with `showcase: { respectReducedMotion: false }`.
 - `textureSeed` now also seeds the cosmos background placement (`--seedx` /
   `--seedy` / `--cosmosbg`), making a seeded card fully deterministic.
 - `Spring.settled` — whether the spring is at rest.
-- `mulberry32` seeded PRNG is exported from the textures module.
+- `mulberry32` seeded PRNG is exported from the textures module and re-exported
+  from the package root.
 - A `node --test` suite covering the pure modules (math, palette, textures,
   spring, subscribers, active registry, orientation) plus a CI job running it.
 - `package.json` is exposed through the package `exports` map for tooling.
