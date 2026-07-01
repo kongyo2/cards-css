@@ -1,0 +1,116 @@
+.holo-card[data-effect="radiant"] {
+  --radiant-space: calc(var(--space) * 0.55);
+}
+
+.holo-card[data-effect="radiant"] .holo-card__shine {
+  background-image:
+    repeating-linear-gradient(
+      calc(var(--angle) - 88deg),
+      var(--sunpillar-1) calc(var(--radiant-space) * 1),
+      var(--sunpillar-2) calc(var(--radiant-space) * 2),
+      var(--sunpillar-3) calc(var(--radiant-space) * 3),
+      var(--sunpillar-4) calc(var(--radiant-space) * 4),
+      var(--sunpillar-5) calc(var(--radiant-space) * 5),
+      var(--sunpillar-6) calc(var(--radiant-space) * 6),
+      var(--sunpillar-1) calc(var(--radiant-space) * 7)
+    ),
+    repeating-linear-gradient(
+      calc(var(--angle) + 2deg),
+      var(--sunpillar-4) calc(var(--radiant-space) * 1),
+      var(--sunpillar-5) calc(var(--radiant-space) * 2),
+      var(--sunpillar-6) calc(var(--radiant-space) * 3),
+      var(--sunpillar-1) calc(var(--radiant-space) * 4),
+      var(--sunpillar-2) calc(var(--radiant-space) * 5),
+      var(--sunpillar-3) calc(var(--radiant-space) * 6),
+      var(--sunpillar-4) calc(var(--radiant-space) * 7)
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.45) 8%,
+      hsla(0, 0%, 40%, 0.35) 50%,
+      hsl(0, 0%, 0%) 125%
+    );
+
+  background-position:
+    calc(((50% - var(--background-x)) * 2.8) + 50%) calc(((50% - var(--background-y)) * 1.6) + 50%),
+    calc(((50% - var(--background-x)) * -2.2) + 50%) calc(((50% - var(--background-y)) * -1.4) + 50%),
+    center center;
+
+  background-size:
+    250% 250%,
+    250% 250%,
+    cover;
+
+  background-blend-mode: screen, screen;
+  filter: brightness(calc(0.75 * var(--hc-brightness))) contrast(calc(1.9 * var(--hc-contrast)))
+    saturate(calc(1.1 * var(--hc-saturate)));
+  mix-blend-mode: color-dodge;
+  opacity: calc(var(--card-opacity) * 0.9 * var(--hc-shine-opacity));
+}
+
+.holo-card[data-effect="radiant"] .holo-card__shine::before {
+  content: "";
+
+  background-image:
+    repeating-linear-gradient(
+      calc(var(--angle) - 88deg),
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 3.2%,
+      hsla(0, 0%, 100%, 0.75) 3.6%,
+      hsla(0, 0%, 0%, 0) 4%,
+      hsla(0, 0%, 0%, 0) 7.2%
+    ),
+    repeating-linear-gradient(
+      calc(var(--angle) + 2deg),
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 3.2%,
+      hsla(0, 0%, 100%, 0.75) 3.6%,
+      hsla(0, 0%, 0%, 0) 4%,
+      hsla(0, 0%, 0%, 0) 7.2%
+    );
+
+  background-position:
+    calc(((50% - var(--background-x)) * 4) + 50%) calc(((50% - var(--background-y)) * 2.4) + 50%),
+    calc(((50% - var(--background-x)) * -3.4) + 50%) calc(((50% - var(--background-y)) * -2) + 50%);
+
+  background-size:
+    200% 200%,
+    200% 200%;
+
+  background-blend-mode: screen;
+  filter: brightness(1) contrast(1.5);
+  mix-blend-mode: hard-light;
+  opacity: calc(0.3 + var(--pointer-from-center) * 0.5);
+}
+
+.holo-card[data-effect="radiant"] .holo-card__shine::after {
+  content: "";
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x) var(--pointer-y),
+    hsla(0, 0%, 90%, 0.8) 0%,
+    hsla(0, 0%, 78%, 0.1) 25%,
+    hsl(0, 0%, 0%) 90%
+  );
+
+  background-position: center center;
+  background-size: cover;
+
+  mix-blend-mode: luminosity;
+  filter: brightness(0.65) contrast(3.5);
+}
+
+.holo-card[data-effect="radiant"] .holo-card__glare {
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.8) 10%,
+      hsla(0, 0%, 60%, 0.3) 45%,
+      hsla(0, 0%, 0%, 0.6) 110%
+    )
+  );
+  filter: brightness(0.8) contrast(1.8);
+  mix-blend-mode: var(--glare-blend, overlay);
+  opacity: calc(var(--card-opacity) * 0.85 * var(--hc-glare-opacity));
+}

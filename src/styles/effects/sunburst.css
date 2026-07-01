@@ -1,0 +1,81 @@
+.holo-card[data-effect="sunburst"] .holo-card__shine {
+  background-image:
+    repeating-conic-gradient(
+      from calc(var(--tilt-x) * 4deg) at var(--pointer-x) var(--pointer-y),
+      var(--sunpillar-clr-1) 0deg,
+      hsla(0, 0%, 4%, 0.9) 4deg,
+      var(--sunpillar-clr-3) 8deg,
+      hsla(0, 0%, 4%, 0.9) 12deg,
+      var(--sunpillar-clr-5) 16deg
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.5) 3%,
+      hsla(0, 0%, 45%, 0.35) 40%,
+      hsl(0, 0%, 0%) 115%
+    );
+
+  background-position:
+    center center,
+    center center;
+
+  background-size: cover, cover;
+
+  background-blend-mode: soft-light;
+  filter: brightness(calc(0.85 * var(--hc-brightness))) contrast(calc(1.6 * var(--hc-contrast)))
+    saturate(calc(1.15 * var(--hc-saturate)));
+  mix-blend-mode: color-dodge;
+  opacity: calc(var(--card-opacity) * 0.9 * var(--hc-shine-opacity));
+}
+
+.holo-card[data-effect="sunburst"] .holo-card__shine::before {
+  content: "";
+
+  background-image: repeating-conic-gradient(
+    from calc(10deg - (var(--tilt-x) * 6deg)) at var(--pointer-x) var(--pointer-y),
+    hsla(0, 0%, 100%, 0) 0deg,
+    hsla(0, 0%, 100%, 0.55) 7deg,
+    hsla(0, 0%, 100%, 0) 14deg,
+    hsla(0, 0%, 100%, 0) 22deg
+  );
+
+  background-size: cover;
+  background-position: center center;
+
+  filter: brightness(1.05) contrast(1.25);
+  mix-blend-mode: overlay;
+  opacity: calc(0.3 + var(--pointer-from-center) * 0.4);
+}
+
+.holo-card[data-effect="sunburst"] .holo-card__shine::after {
+  content: "";
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x) var(--pointer-y),
+    hsla(45, 100%, 94%, 0.6) 0%,
+    hsla(30, 60%, 60%, 0.15) 22%,
+    hsl(250, 20%, 8%) 95%
+  );
+
+  background-size: cover;
+  background-position: center center;
+
+  filter: brightness(0.72) contrast(2.4);
+  mix-blend-mode: luminosity;
+  opacity: calc(0.25 + var(--pointer-from-center) * 0.4);
+}
+
+.holo-card[data-effect="sunburst"] .holo-card__glare {
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(45, 100%, 92%, 0.6) 6%,
+      hsla(35, 60%, 55%, 0.28) 40%,
+      hsla(255, 25%, 6%, 0.75) 110%
+    )
+  );
+  filter: brightness(0.88) contrast(1.6) saturate(1.15);
+  mix-blend-mode: var(--glare-blend, overlay);
+  opacity: calc(var(--card-opacity) * 0.85 * var(--hc-glare-opacity));
+}

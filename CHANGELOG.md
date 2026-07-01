@@ -4,6 +4,39 @@ All notable changes to this project are documented in this file. The format is
 based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-01
+
+### Added
+
+- Ten new foil effects, all pure CSS driven by the existing pointer / tilt
+  variables and palette theming:
+  - `aurora` — northern-lights ribbons drifting across the card;
+  - `rainbow` — pastel rainbow wash with sparkle flecks (secret-rare style);
+  - `gold` — molten gold foil with a hard specular sweep;
+  - `prism` — prismatic conic facets fanning around the parallax point;
+  - `radiant` — criss-cross radiant lines with white hatching;
+  - `crystal` — sharp crystalline shards gliding at independent speeds;
+  - `metal` — brushed-metal sheen with an anisotropic highlight;
+  - `oilslick` — oil-film interference rings with a moiré swirl;
+  - `sunburst` — coloured rays bursting from the pointer;
+  - `mosaic` — holographic mosaic tiles flipping as the card tilts.
+
+  Every new foil honours the `visual` multipliers (`brightness` / `contrast` /
+  `saturate` / `glareOpacity` / `shineOpacity`), the custom `glare` overrides
+  (`--glare-image` / `--glare-blend`), masks, and — where it uses spectrum or
+  sunpillar colours (`rainbow`, `oilslick`, `prism`, `radiant`, `crystal`,
+  `sunburst`, `mosaic`) — the `palette` theming. `rainbow` and `gold`
+  additionally layer the procedural glitter / grain textures when a
+  `textureSeed` is provided, and degrade gracefully without one.
+
+- `HOLO_EFFECTS` — a readonly array of every effect name (`none` first),
+  exported from the package root and now the single source of truth for the
+  `HoloEffect` union. Handy for building effect pickers.
+- A test keeping `HOLO_EFFECTS` and the shipped stylesheets in sync (every
+  foil has a stylesheet targeting its `data-effect`, wired into the bundle,
+  and no stylesheet ships for an unlisted effect).
+- The demo now showcases all fourteen foils with staggered showcase starts.
+
 ## [0.4.0] - 2026-07-01
 
 ### Fixed

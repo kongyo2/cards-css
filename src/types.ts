@@ -1,6 +1,28 @@
 import type { SpringOpts } from "./spring.js";
 
-export type HoloEffect = "none" | "holo" | "reverse" | "cosmos" | "glitter";
+/**
+ * Every built-in effect, `none` first. Handy for building pickers / cycling
+ * foils at runtime; the CSS ships a stylesheet for each entry.
+ */
+export const HOLO_EFFECTS = [
+  "none",
+  "holo",
+  "reverse",
+  "cosmos",
+  "glitter",
+  "aurora",
+  "rainbow",
+  "gold",
+  "prism",
+  "radiant",
+  "crystal",
+  "metal",
+  "oilslick",
+  "sunburst",
+  "mosaic",
+] as const;
+
+export type HoloEffect = (typeof HOLO_EFFECTS)[number];
 
 /**
  * Arbitrary card content: a DOM node, or a factory that builds one from the
