@@ -60,7 +60,7 @@
     "build": "tsc && node scripts/build-css.mjs",
     "demo": "node scripts/build-demo.mjs",
     "pretest": "npm run build:js",
-    "test": "node --test \"tests/*.test.mjs\"",
+    "test": "node --test",
     "clean": "node -e \"const fs=require('node:fs');for(const p of ['dist','dist-types','tsconfig.tsbuildinfo'])fs.rmSync(p,{recursive:true,force:true})\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

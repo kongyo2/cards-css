@@ -26,8 +26,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   destroyed card does not react to its own deactivation.
 - Pointer interaction guards against a zero-size rotator rect, which previously
   poisoned the springs (and the CSS variables) with `NaN`.
-- `pointercancel` is now handled, so an OS-interrupted touch no longer leaves a
-  card stuck in its interacting state.
+- `pointercancel` is now handled as a safety net for browsers that fail to fire
+  the `pointerleave` that the spec mandates after a cancelled touch.
 - Losing focus no longer schedules a spurious snap-back on cards that were
   never active.
 - Duplicate `setActiveCard` calls with the same card no longer re-notify every
@@ -36,9 +36,11 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - Keyboard accessibility for `activateOnClick`: non-button rotators get
-  `role="button"` and respond to <kbd>Enter</kbd> / <kbd>Space</kbd>, matching
-  the existing focus behaviour. Everything added (role, tabindex, listeners) is
-  removed again on `destroy()`.
+  `role="button"` and respond to <kbd>Enter</kbd> / <kbd>Space</kbd> (Space on
+  keyup, per the ARIA button pattern), and the rotator reflects its state via
+  `aria-pressed`. Keystrokes from focusable content nested inside the card
+  (interactive overlays, links) keep their native behaviour. Everything added
+  (role, tabindex, aria-pressed, listeners) is removed again on `destroy()`.
 - The showcase auto-animation now respects `prefers-reduced-motion` by default;
   opt out with `showcase: { respectReducedMotion: false }`.
 - `textureSeed` now also seeds the cosmos background placement (`--seedx` /

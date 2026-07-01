@@ -266,6 +266,7 @@ export class HoloCard {
 
   private isInteracting = false;
   private wasActive = false;
+  private manageAriaPressed = false;
   private firstPop = true;
   private isVisible = typeof document !== "undefined" ? document.visibilityState === "visible" : true;
   private destroyed = false;
@@ -544,20 +545,44 @@ export class HoloCard {
         this.rotator.tabIndex = 0;
         this.cleanups.push(() => this.rotator.removeAttribute("tabindex"));
       }
+      this.manageAriaPressed = true;
+      this.rotator.setAttribute("aria-pressed", "false");
+      this.cleanups.push(() => {
+        this.rotator.removeAttribute("aria-pressed");
+        this.manageAriaPressed = false;
+      });
+
       // Native buttons already fire `click` for Enter/Space and expose a role.
       if (this.rotator.tagName !== "BUTTON") {
         if (!this.rotator.hasAttribute("role")) {
           this.rotator.setAttribute("role", "button");
           this.cleanups.push(() => this.rotator.removeAttribute("role"));
         }
+        // Only keystrokes aimed at the rotator itself count — events bubbling
+        // up from focusable content (interactive overlays, links) must keep
+        // their native behaviour. Space toggles on keyup per the ARIA button
+        // pattern; keydown only swallows it so the page does not scroll.
         const onKeyDown = (event: KeyboardEvent): void => {
-          if (event.key === "Enter" || event.key === " ") {
+          if (event.target !== this.rotator || event.repeat) {
+            return;
+          }
+          if (event.key === "Enter") {
+            event.preventDefault();
+            this.toggleActive();
+          } else if (event.key === " ") {
+            event.preventDefault();
+          }
+        };
+        const onKeyUp = (event: KeyboardEvent): void => {
+          if (event.target === this.rotator && event.key === " ") {
             event.preventDefault();
             this.toggleActive();
           }
         };
         this.rotator.addEventListener("keydown", onKeyDown);
+        this.rotator.addEventListener("keyup", onKeyUp);
         this.cleanups.push(() => this.rotator.removeEventListener("keydown", onKeyDown));
+        this.cleanups.push(() => this.rotator.removeEventListener("keyup", onKeyUp));
       }
 
       const interactiveOverlay = this.element.querySelector<HTMLElement>(`.${CLASS.overlayInteractive}`);
@@ -759,6 +784,9 @@ export class HoloCard {
       return;
     }
     this.wasActive = isActive;
+    if (this.manageAriaPressed) {
+      this.rotator.setAttribute("aria-pressed", String(isActive));
+    }
     if (isActive) {
       this.popover();
       this.element.classList.add(CLASS.active);
