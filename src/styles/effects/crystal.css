@@ -1,0 +1,148 @@
+.holo-card[data-effect="crystal"] .holo-card__shine {
+  background-image:
+    repeating-linear-gradient(
+      112deg,
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 13%,
+      var(--sunpillar-clr-2) 16%,
+      var(--sunpillar-clr-2) 21%,
+      hsla(0, 0%, 0%, 0) 24%,
+      hsla(0, 0%, 0%, 0) 34%
+    ),
+    repeating-linear-gradient(
+      67deg,
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 17%,
+      var(--sunpillar-clr-4) 20%,
+      var(--sunpillar-clr-4) 27%,
+      hsla(0, 0%, 0%, 0) 30%,
+      hsla(0, 0%, 0%, 0) 42%
+    ),
+    repeating-linear-gradient(
+      154deg,
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 10%,
+      var(--sunpillar-clr-6) 13%,
+      var(--sunpillar-clr-6) 19%,
+      hsla(0, 0%, 0%, 0) 22%,
+      hsla(0, 0%, 0%, 0) 28%
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.6) 5%,
+      hsla(0, 0%, 50%, 0.35) 45%,
+      hsl(0, 0%, 0%) 125%
+    );
+
+  background-position:
+    calc(((50% - var(--background-x)) * 3.2) + 50%) calc(((50% - var(--background-y)) * 1.8) + 50%),
+    calc(((50% - var(--background-x)) * -2.4) + 50%) calc(((50% - var(--background-y)) * 2.6) + 50%),
+    calc(((50% - var(--background-x)) * 1.6) + 50%) calc(((50% - var(--background-y)) * -2.8) + 50%),
+    center center;
+
+  background-size:
+    200% 200%,
+    200% 200%,
+    200% 200%,
+    cover;
+
+  background-blend-mode: screen, screen, screen;
+  filter: brightness(calc(0.75 * var(--hc-brightness))) contrast(calc(1.8 * var(--hc-contrast)))
+    saturate(calc(1.05 * var(--hc-saturate)));
+  mix-blend-mode: color-dodge;
+  opacity: calc(var(--card-opacity) * 0.9 * var(--hc-shine-opacity));
+}
+
+.holo-card[data-effect="crystal"] .holo-card__shine::before {
+  content: "";
+
+  background-image:
+    repeating-linear-gradient(
+      131deg,
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 15%,
+      var(--sunpillar-clr-1) 18%,
+      var(--sunpillar-clr-1) 23%,
+      hsla(0, 0%, 0%, 0) 26%,
+      hsla(0, 0%, 0%, 0) 38%
+    ),
+    repeating-linear-gradient(
+      86deg,
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 12%,
+      var(--sunpillar-clr-3) 15%,
+      var(--sunpillar-clr-3) 21%,
+      hsla(0, 0%, 0%, 0) 24%,
+      hsla(0, 0%, 0%, 0) 31%
+    ),
+    repeating-linear-gradient(
+      169deg,
+      hsla(0, 0%, 0%, 0) 0%,
+      hsla(0, 0%, 0%, 0) 18%,
+      var(--sunpillar-clr-5) 21%,
+      var(--sunpillar-clr-5) 26%,
+      hsla(0, 0%, 0%, 0) 29%,
+      hsla(0, 0%, 0%, 0) 44%
+    );
+
+  background-position:
+    calc(((50% - var(--background-x)) * -3) + 50%) calc(((50% - var(--background-y)) * 2.2) + 50%),
+    calc(((50% - var(--background-x)) * 2.6) + 50%) calc(((50% - var(--background-y)) * -1.8) + 50%),
+    calc(((50% - var(--background-x)) * -1.4) + 50%) calc(((50% - var(--background-y)) * -2.4) + 50%);
+
+  background-size:
+    200% 200%,
+    200% 200%,
+    200% 200%;
+
+  background-blend-mode: screen, screen;
+  filter: brightness(1) contrast(1.4);
+  mix-blend-mode: lighten;
+  opacity: 0.7;
+}
+
+.holo-card[data-effect="crystal"] .holo-card__shine::after {
+  content: "";
+
+  background-image:
+    repeating-conic-gradient(
+      from 45deg at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0) 0deg,
+      hsla(0, 0%, 100%, 0) 40deg,
+      hsla(0, 0%, 100%, 0.8) 44.5deg,
+      hsla(0, 0%, 100%, 0.8) 45.5deg,
+      hsla(0, 0%, 100%, 0) 50deg,
+      hsla(0, 0%, 100%, 0) 90deg
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.75) 0%,
+      hsla(0, 0%, 55%, 0.15) 20%,
+      hsl(0, 0%, 4%) 90%
+    );
+
+  background-size: cover, cover;
+  background-position:
+    center center,
+    center center;
+
+  background-blend-mode: screen;
+  filter: brightness(0.75) contrast(2.6);
+  mix-blend-mode: hard-light;
+  opacity: calc(0.25 + var(--pointer-from-center) * 0.6);
+}
+
+.holo-card[data-effect="crystal"] .holo-card__glare {
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.85) 8%,
+      hsla(220, 20%, 60%, 0.3) 45%,
+      hsla(240, 20%, 4%, 0.7) 115%
+    )
+  );
+  filter: brightness(0.85) contrast(1.9);
+  mix-blend-mode: var(--glare-blend, overlay);
+  opacity: calc(var(--card-opacity) * 0.9 * var(--hc-glare-opacity));
+}

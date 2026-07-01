@@ -3,9 +3,10 @@
 [![npm](https://img.shields.io/npm/v/@kongyo2/cards-css.svg)](https://www.npmjs.com/package/@kongyo2/cards-css)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kongyo2/cards-css)
 
-Framework-agnostic holographic trading-card effect — tilt, shine, glare and four
-foils (`holo` / `reverse` / `cosmos` / `glitter`) that react to pointer and
-gyroscope, with procedurally code-generated textures. No runtime dependencies.
+Framework-agnostic holographic trading-card effect — tilt, shine, glare and
+fourteen foils (from the classic `holo` to `aurora`, `gold`, `oilslick` and
+`mosaic`) that react to pointer and gyroscope, with procedurally code-generated
+textures. No runtime dependencies.
 
 [![cards-css — holographic trading cards showing the holo, reverse, cosmos and glitter foils](./assets/screenshot.jpg)](https://kongyo2.github.io/cards-css/)
 
@@ -38,15 +39,29 @@ have on the page (it must contain the `.holo-card__rotator` structure), use
 
 ## Effects
 
-Set via the `effect` option (or `card.setEffect(...)` at runtime):
+Set via the `effect` option (or `card.setEffect(...)` at runtime). The full
+list is exported as `HOLO_EFFECTS` for building pickers:
 
-| Effect    | Description                                                       |
-| --------- | ---------------------------------------------------------------- |
-| `none`    | Tilt, shine and glare only — no foil                             |
-| `holo`    | Rainbow holographic foil                                         |
-| `reverse` | Reverse-line holographic foil                                    |
-| `cosmos`  | Galaxy / cosmos foil (procedural — needs `textureSeed`)      |
-| `glitter` | Glitter / sparkle foil (procedural — needs `textureSeed`)    |
+| Effect     | Description                                                        |
+| ---------- | ------------------------------------------------------------------ |
+| `none`     | Tilt, shine and glare only — no foil                               |
+| `holo`     | Rainbow holographic foil                                           |
+| `reverse`  | Reverse-line holographic foil                                      |
+| `cosmos`   | Galaxy / cosmos foil (procedural — needs `textureSeed`)            |
+| `glitter`  | Glitter / sparkle foil (procedural — needs `textureSeed`)          |
+| `aurora`   | Northern-lights ribbons drifting across the card                   |
+| `rainbow`  | Pastel rainbow wash with sparkle flecks (secret-rare style)        |
+| `gold`     | Molten gold foil with a hard specular sweep                        |
+| `prism`    | Prismatic conic facets fanning around the parallax point           |
+| `radiant`  | Criss-cross radiant lines with white hatching                      |
+| `crystal`  | Sharp crystalline shards gliding at independent speeds             |
+| `metal`    | Brushed-metal sheen with an anisotropic highlight                  |
+| `oilslick` | Oil-film interference rings with a moiré swirl                     |
+| `sunburst` | Coloured rays bursting from the pointer                            |
+| `mosaic`   | Holographic mosaic tiles flipping as the card tilts                |
+
+`rainbow` and `gold` additionally layer the procedural glitter / grain textures
+when a `textureSeed` is provided, and degrade gracefully without one.
 
 ## Options
 
@@ -104,6 +119,7 @@ or react in lockstep with the foil.
 
 - `createHoloCard(options)` → `HoloCard` — builds the element (`image` required).
 - `attachHoloCard(element, options?)` → `HoloCard` — wraps existing markup.
+- `HOLO_EFFECTS` — every built-in effect name (`none` first), for pickers / cycling.
 - `HoloCard`
   - `element` — the root `HTMLElement` to mount.
   - `active` / `interacting` — state getters.

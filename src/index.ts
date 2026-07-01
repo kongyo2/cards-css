@@ -26,6 +26,7 @@ export { PALETTES, resolvePalette, paletteToCssVariables } from "./palette.js";
 export { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 export { Spring, type SpringValue, type SpringOpts, type SpringSetOpts, type SpringDynamics } from "./spring.js";
 export { round, clamp, adjust } from "./math.js";
+export { HOLO_EFFECTS } from "./types.js";
 export type {
   HoloEffect,
   HoloCardOptions,

@@ -42,6 +42,79 @@ const CARDS = [
     visual: { brightness: 1.05 },
     gyroscope: { sensitivity: 1.4, rangeX: 14 },
   },
+  {
+    effect: "aurora",
+    image: "./cards/nebula.svg",
+    name: "Polaris",
+    rarity: "Aurora Rare",
+    physics: { parallax: 1.25 },
+    glow: "hsl(170, 100%, 85%)",
+  },
+  {
+    effect: "rainbow",
+    image: "./cards/phoenix.svg",
+    name: "Spectra",
+    rarity: "Rainbow Rare",
+    textureSeed: 424,
+    visual: { glitterSize: 30 },
+  },
+  {
+    effect: "gold",
+    image: "./cards/leviathan.svg",
+    name: "Midas",
+    rarity: "Gold Secret",
+    textureSeed: 555,
+    physics: { maxTilt: 16 },
+  },
+  {
+    effect: "prism",
+    image: "./cards/prism.svg",
+    name: "Prisma Core",
+    rarity: "Prismatic",
+    physics: { parallax: 1.3 },
+  },
+  {
+    effect: "radiant",
+    image: "./cards/phoenix.svg",
+    name: "Radiant Ember",
+    rarity: "Radiant",
+    visual: { lineSpace: 3.2 },
+  },
+  {
+    effect: "crystal",
+    image: "./cards/nebula.svg",
+    name: "Crystalis",
+    rarity: "Crystal Rare",
+    palette: { preset: "sapphire" },
+  },
+  {
+    effect: "metal",
+    image: "./cards/leviathan.svg",
+    name: "Aegis",
+    rarity: "Metal Rare",
+    physics: { maxTilt: 15 },
+  },
+  {
+    effect: "oilslick",
+    image: "./cards/prism.svg",
+    name: "Slick Wyrm",
+    rarity: "Iridescent",
+    physics: { parallax: 1.4 },
+  },
+  {
+    effect: "sunburst",
+    image: "./cards/phoenix.svg",
+    name: "Solaris",
+    rarity: "Blazing Rare",
+    glow: "hsl(45, 100%, 80%)",
+  },
+  {
+    effect: "mosaic",
+    image: "./cards/prism.svg",
+    name: "Mosaic Golem",
+    rarity: "Mosaic Holo",
+    visual: { glitterSize: 32 },
+  },
 ];
 
 const grid = document.getElementById("cards");
@@ -53,19 +126,21 @@ const rarityPlate = (label) => {
   return plate;
 };
 
-for (const def of CARDS) {
+CARDS.forEach((def, index) => {
   const card = createHoloCard({
     image: def.image,
     imageAlt: def.name,
     effect: def.effect,
     // The library skips the showcase itself when the user prefers reduced motion.
-    showcase: def.showcase ?? true,
+    // Stagger the start a little so the whole grid does not sweep in unison.
+    showcase: def.showcase ?? { delay: 1800 + index * 220 },
     activateOnClick: true,
     physics: def.physics,
     ...(def.visual ? { visual: def.visual } : {}),
     ...(def.palette ? { palette: def.palette } : {}),
     ...(def.glare ? { glare: def.glare } : {}),
     ...(def.depth ? { depth: def.depth } : {}),
+    ...(def.glow ? { glow: def.glow } : {}),
     ...(def.gyroscope !== undefined ? { gyroscope: def.gyroscope } : {}),
     overlay: rarityPlate(def.rarity),
     ...(typeof def.textureSeed === "number" ? { textureSeed: def.textureSeed } : {}),
@@ -93,7 +168,7 @@ for (const def of CARDS) {
   slot.append(stage, caption);
 
   grid.appendChild(slot);
-}
+});
 
 const unlockGyroscope = () => {
   void requestOrientationPermission();

@@ -1,0 +1,102 @@
+.holo-card[data-effect="mosaic"] {
+  --mosaic-size: calc(var(--glittersize) * 0.55);
+}
+
+.holo-card[data-effect="mosaic"] .holo-card__shine {
+  background-image:
+    repeating-conic-gradient(hsl(0, 0%, 100%) 0% 25%, hsl(0, 0%, 22%) 0% 50%),
+    repeating-linear-gradient(
+      var(--angle),
+      var(--sunpillar-clr-1) calc(var(--space) * 1),
+      var(--sunpillar-clr-2) calc(var(--space) * 2),
+      var(--sunpillar-clr-3) calc(var(--space) * 3),
+      var(--sunpillar-clr-4) calc(var(--space) * 4),
+      var(--sunpillar-clr-5) calc(var(--space) * 5),
+      var(--sunpillar-clr-6) calc(var(--space) * 6),
+      var(--sunpillar-clr-1) calc(var(--space) * 7)
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.5) 5%,
+      hsla(0, 0%, 45%, 0.35) 45%,
+      hsl(0, 0%, 0%) 120%
+    );
+
+  background-position:
+    center center,
+    calc(((50% - var(--background-x)) * 2.6) + 50%) calc(((50% - var(--background-y)) * 2) + 50%),
+    center center;
+
+  background-size:
+    var(--mosaic-size) calc(var(--mosaic-size) * 0.72),
+    400% 400%,
+    cover;
+
+  background-blend-mode: overlay, multiply;
+  filter: brightness(calc(0.82 * var(--hc-brightness))) contrast(calc(1.9 * var(--hc-contrast)))
+    saturate(calc(0.95 * var(--hc-saturate)));
+  mix-blend-mode: color-dodge;
+  opacity: calc(var(--card-opacity) * 0.9 * var(--hc-shine-opacity));
+}
+
+.holo-card[data-effect="mosaic"] .holo-card__shine::before {
+  content: "";
+
+  background-image:
+    repeating-conic-gradient(hsl(0, 0%, 20%) 0% 25%, hsl(0, 0%, 96%) 0% 50%),
+    repeating-linear-gradient(
+      calc(var(--angle) + 180deg),
+      var(--sunpillar-clr-4) calc(var(--space) * 1),
+      var(--sunpillar-clr-5) calc(var(--space) * 2),
+      var(--sunpillar-clr-6) calc(var(--space) * 3),
+      var(--sunpillar-clr-1) calc(var(--space) * 4),
+      var(--sunpillar-clr-2) calc(var(--space) * 5),
+      var(--sunpillar-clr-3) calc(var(--space) * 6),
+      var(--sunpillar-clr-4) calc(var(--space) * 7)
+    );
+
+  background-position:
+    calc(50% + (var(--mosaic-size) / 2)) calc(50% + (var(--mosaic-size) * 0.36)),
+    calc(((50% - var(--background-x)) * -2.2) + 50%) calc(((50% - var(--background-y)) * -1.6) + 50%);
+
+  background-size:
+    var(--mosaic-size) calc(var(--mosaic-size) * 0.72),
+    400% 400%;
+
+  background-blend-mode: overlay;
+  filter: brightness(1.05) contrast(1.5);
+  mix-blend-mode: lighten;
+  opacity: calc(0.35 + var(--pointer-from-center) * 0.45);
+}
+
+.holo-card[data-effect="mosaic"] .holo-card__shine::after {
+  content: "";
+
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x) var(--pointer-y),
+    hsla(0, 0%, 92%, 0.7) 0%,
+    hsla(0, 0%, 74%, 0.1) 28%,
+    hsl(0, 0%, 6%) 90%
+  );
+
+  background-size: cover;
+  background-position: center center;
+
+  mix-blend-mode: luminosity;
+  filter: brightness(0.62) contrast(3);
+}
+
+.holo-card[data-effect="mosaic"] .holo-card__glare {
+  background-image: var(
+    --glare-image,
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      hsla(0, 0%, 100%, 0.8) 10%,
+      hsla(0, 0%, 65%, 0.35) 45%,
+      hsla(0, 0%, 0%, 0.6) 110%
+    )
+  );
+  filter: brightness(0.85) contrast(1.8);
+  mix-blend-mode: var(--glare-blend, overlay);
+  opacity: calc(var(--card-opacity) * 0.9 * var(--hc-glare-opacity));
+}
