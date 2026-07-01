@@ -49,6 +49,18 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run format:check
 
+  test:
+    name: Test (node --test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+
   build:
     name: Build (publish artifacts)
     runs-on: ubuntu-latest

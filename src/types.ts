@@ -63,6 +63,8 @@ export interface ShowcaseOptions {
   intensity?: number;
   /** Spring tuning while the showcase runs. */
   spring?: SpringTuning;
+  /** Skip the auto-animation when the user prefers reduced motion (default true). */
+  respectReducedMotion?: boolean;
 }
 
 /** Built-in foil colour schemes for {@link PaletteOptions.preset}. */

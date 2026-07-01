@@ -122,6 +122,11 @@ export class Spring<T extends SpringValue> {
     return this.value;
   }
 
+  /** Whether the spring is at rest (no animation task is running). */
+  get settled(): boolean {
+    return this.task === null;
+  }
+
   subscribe(fn: (value: T) => void): () => void {
     return this.subscribers.subscribe(fn);
   }

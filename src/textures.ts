@@ -12,7 +12,8 @@ export interface Textures {
 
 export const DEFAULT_TEXTURE_SEED = 0x9e3779b9;
 
-const mulberry32 = (seed: number): (() => number) => {
+/** Deterministic PRNG (mulberry32) returning values in [0, 1) for a given seed. */
+export const mulberry32 = (seed: number): (() => number) => {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) | 0;

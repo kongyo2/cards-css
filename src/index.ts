@@ -9,6 +9,7 @@ export {
   texturesToCssVariables,
   grainTexture,
   glitterTexture,
+  mulberry32,
   TEXTURE_VARIABLES,
   DEFAULT_TEXTURE_SEED,
   type Textures,

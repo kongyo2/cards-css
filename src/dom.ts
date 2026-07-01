@@ -71,11 +71,9 @@ export const normalizeMask = (mask: string | MaskOptions | undefined): ResolvedM
 };
 
 const addClasses = (element: HTMLElement, className: string | undefined): void => {
-  if (!className) {
-    return;
-  }
-  for (const name of className.split(/\s+/).filter(Boolean)) {
-    element.classList.add(name);
+  const names = className ? className.split(/\s+/).filter(Boolean) : [];
+  if (names.length > 0) {
+    element.classList.add(...names);
   }
 };
 
