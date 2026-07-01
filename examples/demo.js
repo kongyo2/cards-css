@@ -44,7 +44,6 @@ const CARDS = [
   },
 ];
 
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const grid = document.getElementById("cards");
 
 const rarityPlate = (label) => {
@@ -59,7 +58,8 @@ for (const def of CARDS) {
     image: def.image,
     imageAlt: def.name,
     effect: def.effect,
-    showcase: reduceMotion ? false : (def.showcase ?? true),
+    // The library skips the showcase itself when the user prefers reduced motion.
+    showcase: def.showcase ?? true,
     activateOnClick: true,
     physics: def.physics,
     ...(def.visual ? { visual: def.visual } : {}),

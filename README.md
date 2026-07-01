@@ -58,12 +58,12 @@ Set via the `effect` option (or `card.setEffect(...)` at runtime):
 | `className`       | `string`  | —        | Extra class names for the root element             |
 | `effect`          | `HoloEffect` | `"none"` | One of the effects above                        |
 | `interactive`     | `boolean` | `true`   | React to pointer move                              |
-| `activateOnClick` | `boolean` | `false`  | Click to pop the card into a centered showcase     |
+| `activateOnClick` | `boolean` | `false`  | Click (or focus + <kbd>Enter</kbd>/<kbd>Space</kbd>) to pop the card into a centered showcase |
 | `gyroscope`       | `boolean \| GyroscopeOptions` | `true` | Tilt to device orientation while active; pass an object to tune `rangeX` / `rangeY` / `sensitivity` / `invertX` / `invertY` |
-| `showcase`        | `boolean \| ShowcaseOptions` | `false` | Auto-animate once on mount; pass an object to tune `delay` / `duration` / `loop` / `speed` / `intensity` / `spring` |
+| `showcase`        | `boolean \| ShowcaseOptions` | `false` | Auto-animate once on mount; pass an object to tune `delay` / `duration` / `loop` / `speed` / `intensity` / `spring`. Skipped under `prefers-reduced-motion` unless `respectReducedMotion: false` |
 | `glow`            | `string`  | —        | CSS color for the card glow                        |
 | `aspectRatio`     | `number`  | —        | Card aspect ratio (width / height)                 |
-| `textureSeed`     | `number`  | —        | Seed for the generated `cosmos` / `glitter` textures; without it those two foils render without their procedural layers |
+| `textureSeed`     | `number`  | —        | Seed for the generated `cosmos` / `glitter` textures (and the cosmos background placement, so a seeded card is fully deterministic); without it those two foils render without their procedural layers |
 | `mask`            | `string \| MaskOptions` | — | Mask URL, or `{ image, size, position, repeat, mode }` — `mode: "card"` clips the whole card into the mask silhouette |
 | `foil`            | `string`  | —        | URL for a custom foil overlay                      |
 | `palette`         | `PaletteOptions` | — | Foil colour theming: a `preset` (`rainbow` / `gold` / `aurora` / `ruby` / `sapphire` / `mono`) and/or custom `sunpillars` / `spectrum` / `cosmos` colour stops plus `edge` / `back` / `glow` |
@@ -116,7 +116,7 @@ or react in lockstep with the foil.
   - `setDepth(depth)` — toggle or tune the 3D depth at runtime (`false` disables it).
   - `setGyroscope(gyroscope)` — update gyroscope tuning at runtime.
   - `addLayer(options)` — insert an extra layer between artwork and foil, returns the element.
-  - `destroy()` — remove listeners and reset the element.
+  - `destroy()` — remove listeners and timers, and clear the interaction state (classes, inline variables) from the element.
 
 On iOS, gyroscope access needs a one-time permission prompt triggered by a user
 gesture — call `requestOrientationPermission()` (exported) from a click/tap

@@ -3,7 +3,7 @@ import { Spring, type SpringSetOpts, type SpringOpts, type SpringDynamics } from
 import { CLASS, applyVars, buildLayerElement, cssUrl, normalizeMask } from "./dom.js";
 import { getActiveCard, setActiveCard, subscribeActiveCard } from "./active-registry.js";
 import { resetBaseOrientation, subscribeOrientation, type RelativeOrientation } from "./orientation.js";
-import { generateTextures, texturesToCssVariables } from "./textures.js";
+import { generateTextures, mulberry32, texturesToCssVariables } from "./textures.js";
 import { paletteToCssVariables, PALETTE_VARIABLES } from "./palette.js";
 import type {
   CssVars,
@@ -27,6 +27,23 @@ const cancelFrame = (id: number): void => {
     clearTimeout(id);
   }
 };
+
+const stopTimeout = (id: ReturnType<typeof setTimeout> | null): null => {
+  if (id !== null) {
+    clearTimeout(id);
+  }
+  return null;
+};
+
+const stopInterval = (id: ReturnType<typeof setInterval> | null): null => {
+  if (id !== null) {
+    clearInterval(id);
+  }
+  return null;
+};
+
+const prefersReducedMotion = (): boolean =>
+  typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const SPRING_INTERACT = { stiffness: 0.066, damping: 0.25 };
 const SPRING_POPOVER = { stiffness: 0.033, damping: 0.45 };
@@ -98,17 +115,19 @@ interface ResolvedShowcase {
   loop: boolean;
   speed: number;
   intensity: number;
+  respectReducedMotion: boolean;
   dynamics: BaseDynamics;
 }
 
 const resolveShowcase = (showcase: boolean | ShowcaseOptions | undefined): ResolvedShowcase => {
-  const opts: ShowcaseOptions = typeof showcase === "object" ? showcase : {};
+  const opts: ShowcaseOptions = showcase && typeof showcase === "object" ? showcase : {};
   return {
     delay: opts.delay ?? 2000,
     duration: opts.duration ?? 4000,
     loop: opts.loop ?? false,
     speed: opts.speed ?? 0.05,
     intensity: opts.intensity ?? 25,
+    respectReducedMotion: opts.respectReducedMotion ?? true,
     dynamics: resolveDynamics({ stiffness: 0.02, damping: 0.5 }, opts.spring),
   };
 };
@@ -210,6 +229,8 @@ interface Glare extends Vec2 {
   o: number;
 }
 
+type CardSpring = Spring<Vec2> | Spring<Glare> | Spring<number>;
+
 export class HoloCard {
   readonly element: HTMLElement;
 
@@ -226,6 +247,7 @@ export class HoloCard {
   private readonly springRotateDelta: Spring<Vec2>;
   private readonly springTranslate: Spring<Vec2>;
   private readonly springScale: Spring<number>;
+  private readonly allSprings: readonly CardSpring[];
 
   private readonly liveRotate: BaseDynamics;
   private readonly liveGlare: BaseDynamics;
@@ -243,6 +265,7 @@ export class HoloCard {
   private readonly showcaseConfig: ResolvedShowcase;
 
   private isInteracting = false;
+  private wasActive = false;
   private firstPop = true;
   private isVisible = typeof document !== "undefined" ? document.visibilityState === "visible" : true;
   private destroyed = false;
@@ -281,10 +304,12 @@ export class HoloCard {
     this.showcaseConfig = resolveShowcase(options.showcase);
 
     const physics = options.physics ?? {};
-    this.tiltFactorX = (physics.maxTiltX ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / 50;
-    this.tiltFactorY = (physics.maxTiltY ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / 50;
-    this.tiltScaleX = (physics.maxTiltX ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / DEFAULT_MAX_TILT;
-    this.tiltScaleY = (physics.maxTiltY ?? physics.maxTilt ?? DEFAULT_MAX_TILT) / DEFAULT_MAX_TILT;
+    const maxTiltX = physics.maxTiltX ?? physics.maxTilt ?? DEFAULT_MAX_TILT;
+    const maxTiltY = physics.maxTiltY ?? physics.maxTilt ?? DEFAULT_MAX_TILT;
+    this.tiltFactorX = maxTiltX / 50;
+    this.tiltFactorY = maxTiltY / 50;
+    this.tiltScaleX = maxTiltX / DEFAULT_MAX_TILT;
+    this.tiltScaleY = maxTiltY / DEFAULT_MAX_TILT;
     this.parallax = physics.parallax ?? 1;
     this.glareRange = physics.glareRange ?? 1;
     this.returnDelay = physics.returnDelay ?? 500;
@@ -308,6 +333,15 @@ export class HoloCard {
     );
     this.springTranslate = new Spring<Vec2>({ x: 0, y: 0 }, resolveDynamics(popoverBase, physics.springs?.translate));
     this.springScale = new Spring<number>(1, resolveDynamics(popoverBase, physics.springs?.scale));
+    this.allSprings = [
+      this.springRotate,
+      this.springGlare,
+      this.springBackground,
+      this.springPointer,
+      this.springRotateDelta,
+      this.springTranslate,
+      this.springScale,
+    ];
 
     if (options.effect) {
       element.dataset.effect = options.effect;
@@ -355,15 +389,7 @@ export class HoloCard {
 
     this.applyStaticStyles(options.textureSeed);
 
-    for (const spring of [
-      this.springRotate,
-      this.springGlare,
-      this.springBackground,
-      this.springPointer,
-      this.springRotateDelta,
-      this.springTranslate,
-      this.springScale,
-    ]) {
+    for (const spring of this.allSprings) {
       this.cleanups.push(spring.subscribe(() => this.scheduleRender()));
     }
 
@@ -468,8 +494,9 @@ export class HoloCard {
   }
 
   private applyStaticStyles(seed: number | undefined): void {
-    const seedX = Math.random();
-    const seedY = Math.random();
+    const rng = typeof seed === "number" ? mulberry32(seed) : Math.random;
+    const seedX = rng();
+    const seedY = rng();
     const cosmosX = Math.floor(seedX * 734);
     const cosmosY = Math.floor(seedY * 1280);
     this.element.style.setProperty("--seedx", String(seedX));
@@ -489,10 +516,13 @@ export class HoloCard {
 
     const onPointerMove = (event: PointerEvent): void => this.interact(event);
     const onPointerLeave = (): void => this.interactEnd();
+    const onPointerCancel = (): void => this.interactEnd(0);
     this.rotator.addEventListener("pointermove", onPointerMove);
     this.rotator.addEventListener("pointerleave", onPointerLeave);
+    this.rotator.addEventListener("pointercancel", onPointerCancel);
     this.cleanups.push(() => this.rotator.removeEventListener("pointermove", onPointerMove));
     this.cleanups.push(() => this.rotator.removeEventListener("pointerleave", onPointerLeave));
+    this.cleanups.push(() => this.rotator.removeEventListener("pointercancel", onPointerCancel));
 
     if (this.options.activateOnClick) {
       const onClick = (): void => this.toggleActive();
@@ -501,13 +531,34 @@ export class HoloCard {
         if (next instanceof Node && this.element.contains(next)) {
           return;
         }
-        this.deactivate();
+        if (this.active) {
+          this.deactivate();
+        }
       };
       this.rotator.addEventListener("click", onClick);
       this.rotator.addEventListener("focusout", onFocusOut);
-      this.rotator.tabIndex = this.rotator.tabIndex >= 0 ? this.rotator.tabIndex : 0;
       this.cleanups.push(() => this.rotator.removeEventListener("click", onClick));
       this.cleanups.push(() => this.rotator.removeEventListener("focusout", onFocusOut));
+
+      if (this.rotator.tabIndex < 0) {
+        this.rotator.tabIndex = 0;
+        this.cleanups.push(() => this.rotator.removeAttribute("tabindex"));
+      }
+      // Native buttons already fire `click` for Enter/Space and expose a role.
+      if (this.rotator.tagName !== "BUTTON") {
+        if (!this.rotator.hasAttribute("role")) {
+          this.rotator.setAttribute("role", "button");
+          this.cleanups.push(() => this.rotator.removeAttribute("role"));
+        }
+        const onKeyDown = (event: KeyboardEvent): void => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            this.toggleActive();
+          }
+        };
+        this.rotator.addEventListener("keydown", onKeyDown);
+        this.cleanups.push(() => this.rotator.removeEventListener("keydown", onKeyDown));
+      }
 
       const interactiveOverlay = this.element.querySelector<HTMLElement>(`.${CLASS.overlayInteractive}`);
       if (interactiveOverlay) {
@@ -546,13 +597,14 @@ export class HoloCard {
       return;
     }
 
-    this.setInteracting(true);
-    if (this.endTimer) {
-      clearTimeout(this.endTimer);
-      this.endTimer = null;
+    const rect = this.rotator.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
     }
 
-    const rect = this.rotator.getBoundingClientRect();
+    this.setInteracting(true);
+    this.endTimer = stopTimeout(this.endTimer);
+
     const absolute = { x: event.clientX - rect.left, y: event.clientY - rect.top };
     const percent = {
       x: clamp(round((100 / rect.width) * absolute.x)),
@@ -586,9 +638,7 @@ export class HoloCard {
     }
     this.pendingUpdate = null;
 
-    if (this.endTimer) {
-      clearTimeout(this.endTimer);
-    }
+    this.endTimer = stopTimeout(this.endTimer);
     this.endTimer = setTimeout(() => {
       this.setInteracting(false);
       this.setGroupDynamics(this.snapDynamics);
@@ -643,16 +693,30 @@ export class HoloCard {
     this.renderScheduled = true;
     requestFrame(() => {
       this.renderScheduled = false;
-      this.applyStyles();
+      if (!this.destroyed) {
+        this.applyStyles();
+      }
     });
   }
 
+  private clearRenderVars(): void {
+    const style = this.element.style;
+    for (const name of RENDER_VARS) {
+      style.removeProperty(name);
+    }
+  }
+
   private applyStyles(): void {
-    if (!this.options.interactive && !this.isInteracting && !this.active) {
-      const style = this.element.style;
-      for (const name of RENDER_VARS) {
-        style.removeProperty(name);
-      }
+    if (
+      !this.options.interactive &&
+      !this.isInteracting &&
+      !this.active &&
+      this.allSprings.every((spring) => spring.settled)
+    ) {
+      // At rest, a non-interactive card sheds its inline vars so the pure-CSS
+      // hover fallback can drive them; waiting for the springs keeps the
+      // showcase/snap-back animation visible instead of jumping to rest.
+      this.clearRenderVars();
       return;
     }
 
@@ -687,7 +751,15 @@ export class HoloCard {
   }
 
   private onActiveChange(): void {
-    if (getActiveCard() === this) {
+    const isActive = getActiveCard() === this;
+    if (isActive === this.wasActive) {
+      // Only transitions matter: the registry notifies every card on every
+      // change, and cards that were never active must not retreat (that would
+      // reassign their spring dynamics mid-interaction or mid-showcase).
+      return;
+    }
+    this.wasActive = isActive;
+    if (isActive) {
       this.popover();
       this.element.classList.add(CLASS.active);
       this.element.style.setProperty("--card-active", "1");
@@ -739,9 +811,7 @@ export class HoloCard {
   }
 
   private reposition(): void {
-    if (this.repositionTimer) {
-      clearTimeout(this.repositionTimer);
-    }
+    this.repositionTimer = stopTimeout(this.repositionTimer);
     this.repositionTimer = setTimeout(() => {
       if (getActiveCard() === this) {
         this.setCenter();
@@ -794,7 +864,13 @@ export class HoloCard {
   private onVisibilityChange(): void {
     this.isVisible = document.visibilityState === "visible";
     this.endShowcase();
-    this.reset();
+    if (this.active) {
+      // Keep the popover: hard-settling scale/translate here would visually
+      // retreat the card while it stays active in the registry.
+      this.interactEnd(0);
+    } else {
+      this.reset();
+    }
   }
 
   private startShowcase(): void {
@@ -802,13 +878,13 @@ export class HoloCard {
       return;
     }
     const config = this.showcaseConfig;
+    if (config.respectReducedMotion && prefersReducedMotion()) {
+      return;
+    }
     const amp = config.intensity;
     let r = 0;
     this.showcaseStart = setTimeout(() => {
-      if (this.endTimer) {
-        clearTimeout(this.endTimer);
-        this.endTimer = null;
-      }
+      this.endTimer = stopTimeout(this.endTimer);
       this.setInteracting(true);
       this.setGroupDynamics(config.dynamics);
       if (!this.isVisible) {
@@ -831,10 +907,7 @@ export class HoloCard {
       }, 20);
       if (!config.loop) {
         this.showcaseEnd = setTimeout(() => {
-          if (this.showcaseInterval) {
-            clearInterval(this.showcaseInterval);
-            this.showcaseInterval = null;
-          }
+          this.showcaseInterval = stopInterval(this.showcaseInterval);
           this.interactEnd(0);
         }, config.duration);
       }
@@ -845,18 +918,9 @@ export class HoloCard {
     if (!this.showcaseRunning) {
       return;
     }
-    if (this.showcaseEnd) {
-      clearTimeout(this.showcaseEnd);
-      this.showcaseEnd = null;
-    }
-    if (this.showcaseStart) {
-      clearTimeout(this.showcaseStart);
-      this.showcaseStart = null;
-    }
-    if (this.showcaseInterval) {
-      clearInterval(this.showcaseInterval);
-      this.showcaseInterval = null;
-    }
+    this.showcaseEnd = stopTimeout(this.showcaseEnd);
+    this.showcaseStart = stopTimeout(this.showcaseStart);
+    this.showcaseInterval = stopInterval(this.showcaseInterval);
     this.showcaseRunning = false;
   }
 
@@ -978,33 +1042,27 @@ export class HoloCard {
     this.destroyed = true;
     this.endShowcase();
     this.stopGyroscope();
-    if (getActiveCard() === this) {
-      setActiveCard(null);
-    }
-    for (const timer of [this.repositionTimer, this.endTimer]) {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    }
-    if (this.interactRaf !== null) {
-      cancelFrame(this.interactRaf);
-      this.interactRaf = null;
-    }
+    // Unsubscribe (and remove listeners) before releasing the active slot so
+    // this card does not react to its own deactivation mid-teardown.
     for (const cleanup of this.cleanups) {
       cleanup();
     }
     this.cleanups.length = 0;
-    for (const spring of [
-      this.springRotate,
-      this.springGlare,
-      this.springBackground,
-      this.springPointer,
-      this.springRotateDelta,
-      this.springTranslate,
-      this.springScale,
-    ]) {
+    if (getActiveCard() === this) {
+      setActiveCard(null);
+    }
+    this.repositionTimer = stopTimeout(this.repositionTimer);
+    this.endTimer = stopTimeout(this.endTimer);
+    if (this.interactRaf !== null) {
+      cancelFrame(this.interactRaf);
+      this.interactRaf = null;
+    }
+    this.pendingUpdate = null;
+    for (const spring of this.allSprings) {
       spring.destroy();
     }
+    this.clearRenderVars();
+    this.element.style.removeProperty("--card-active");
     this.element.classList.remove(CLASS.interactive, CLASS.interacting, CLASS.active);
   }
 }

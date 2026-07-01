@@ -158,12 +158,14 @@ export const PALETTE_VARIABLES: string[] = [
   "--card-glow",
 ];
 
-const cycleInto = (vars: Record<string, string>, prefix: string, count: number, colors: string[]): void => {
+const cycle = (colors: readonly string[], index: number): string => colors[index % colors.length] as string;
+
+const cycleInto = (vars: Record<string, string>, prefix: string, count: number, colors: readonly string[]): void => {
   if (colors.length === 0) {
     return;
   }
   for (let i = 0; i < count; i += 1) {
-    vars[`${prefix}${i + 1}`] = colors[i % colors.length] as string;
+    vars[`${prefix}${i + 1}`] = cycle(colors, i);
   }
 };
 
@@ -174,9 +176,10 @@ export const paletteToCssVariables = (palette: PaletteOptions): Record<string, s
   if (resolved.sunpillars) {
     cycleInto(vars, "--sunpillar-", 6, resolved.sunpillars);
   }
-  if (resolved.spectrum && resolved.spectrum.length > 0) {
+  const spectrum = resolved.spectrum;
+  if (spectrum && spectrum.length > 0) {
     SPECTRUM_VARS.forEach((name, i) => {
-      vars[name] = resolved.spectrum![i % resolved.spectrum!.length] as string;
+      vars[name] = cycle(spectrum, i);
     });
   }
   if (resolved.cosmos) {

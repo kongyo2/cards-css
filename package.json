@@ -1,6 +1,6 @@
 {
   "name": "@kongyo2/cards-css",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Framework-agnostic holographic trading-card effect (tilt, shine, glare, holo / reverse / cosmos / glitter) with procedurally code-generated textures.",
   "type": "module",
   "license": "MIT",
@@ -35,7 +35,8 @@
       "import": "./dist/index.js"
     },
     "./styles.css": "./dist/holo-cards.css",
-    "./holo-cards.css": "./dist/holo-cards.css"
+    "./holo-cards.css": "./dist/holo-cards.css",
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -58,6 +59,8 @@
     "build:css": "node scripts/build-css.mjs",
     "build": "tsc && node scripts/build-css.mjs",
     "demo": "node scripts/build-demo.mjs",
+    "pretest": "npm run build:js",
+    "test": "node --test \"tests/*.test.mjs\"",
     "clean": "node -e \"const fs=require('node:fs');for(const p of ['dist','dist-types','tsconfig.tsbuildinfo'])fs.rmSync(p,{recursive:true,force:true})\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
